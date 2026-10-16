@@ -2,12 +2,13 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { planJourney } from '../core'
 import { validateDataset } from '../core/validation'
-import type { RouteMode, JourneyRoute, WalkPath, MetroDataset } from '../core/types'
+import type { RouteMode, JourneyRoute, MetroDataset } from '../core/types'
 import { demoDataset, demoScenarios } from '../data/demo'
 import { fuzhouDataset, fuzhouDataErrors } from '../data/fuzhou'
 import { loadPersonalDataset, savePersonalDataset } from '../data/local-store'
 import StationEditor from '../maintenance/StationEditor.vue'
-import ExternalConnection from './ExternalConnection.vue'
+import RouteTimeline from './RouteTimeline.vue'
+import { lineInk } from './route-presentation'
 import { applyLongStationNames } from '../data/ui-fixtures'
 
 const props = defineProps<{ fixture?: string }>()
@@ -34,7 +35,7 @@ const query = ref('')
 type Sheet = 'scenarios' | 'routes' | 'doors' | 'network' | 'data'
 const sheet = ref<Sheet | null>(null)
 const expanded = ref<string[]>([])
-const longNamesApplied = ref(false)
+const fixtureApplied = ref(false)
 const modes: { id: RouteMode; icon: string; name: string; desc: string }[] = [
   { id: 'shortest', icon: '↗', name: '最近路线', desc: '优先缩短站内步行' },
   { id: 'few-stairs', icon: '≋', name: '少走楼梯', desc: '优先使用扶梯与电梯' },
@@ -44,11 +45,11 @@ const stationName = (id: string) => data.stations.find(s => s.id === id)?.name ?
 const filteredStations = computed(() => data.stations.filter(s => s.name.includes(query.value.trim())))
 const scenarios = computed(() => demoScenarios.filter(s => data.stations.some(station => station.id === s.from) && data.stations.some(station => station.id === s.to)))
 const route = computed(() => result.value?.routes[selectedRoute.value])
-const combination = computed(() => route.value?.doorCombinations[selectedCombination.value])
 const currentMode = computed(() => modes.find(m => m.id === mode.value)!)
 const sheetTitle = computed(() => ({ scenarios: '选择线网与演示场景', routes: '选择乘车方案', doors: '选择一组推荐车门', network: '运营线网与覆盖车站', data: '数据与规划说明' })[sheet.value ?? 'data'])
 const errorTitle = computed(() => dataErrors.value.length ? '数据加载失败' : result.value?.status === 'incomplete' ? '站内资料还需补全' : result.value?.status === 'invalid' ? '请检查起点和终点' : '暂未找到可通行方案')
 const errorMessages = computed(() => result.value?.diagnostics.filter(text => !text.startsWith('范围：') && !text.startsWith('候选范围：') && !text.startsWith('合成演示数据：')) ?? [])
+const actionableErrors = computed(() => errorMessages.value.filter(text => !text.startsWith('已录入站内数据时') && !text.startsWith('线路候选')))
 const searchLimited = computed(() => result.value?.diagnostics.some(text => text.includes('搜索') && (text.includes('上限') || text.includes('截断'))))
 const linesForStation = (id: string) => data.lines.filter(l => data.services.some(s => s.lineId === l.id && s.stops.some(p => p.stationId === id)))
 function calculate() {
@@ -67,20 +68,7 @@ function loadScenario(scenario: typeof demoScenarios[number]) { from.value = sce
 function toggle(id: string) { expanded.value = expanded.value.includes(id) ? expanded.value.filter(x => x !== id) : [...expanded.value, id] }
 function selectRoute(i: number) { selectedRoute.value = i; selectedCombination.value = 0; expanded.value = []; sheet.value = null }
 function selectCombination(i: number) { selectedCombination.value = i; sheet.value = null }
-function pathForTransfer(index: number): WalkPath | null | undefined { return combination.value?.transferPaths[index] ?? route.value?.transfers[index]?.path }
-function formationForLeg(index: number) { return data.formations.find(f => f.id === data.services.find(s => s.id === route.value?.legs[index]?.serviceId)?.formationId) }
-function currentDoor(index: number) { return combination.value?.positions[index] ?? route.value?.legs[index]?.recommendations[0] }
-function viaStations(index: number) {
-  const leg = route.value?.legs[index], service = data.services.find(s => s.id === leg?.serviceId)
-  if (!leg || !service) return []
-  return service.stops.slice(service.stops.findIndex(s => s.stationId === leg.fromStationId), service.stops.findIndex(s => s.stationId === leg.toStationId) + 1)
-}
 function routeLabel(item: JourneyRoute) { return item.legs.length ? item.legs.map(l => l.lineName.replace('演示', '')).join(' → ') : '站外步行衔接，无需乘车' }
-function lineInk(hex: string) {
-  const channels = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
-  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
-  return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05 ? '#ffffff' : '#000000'
-}
 const minutes = (value: number | null) => value === null ? '待补' : Math.ceil(value)
 const stopCount = (item: JourneyRoute) => item.legs.reduce((sum, leg) => sum + leg.stopCount, 0)
 const outsideCount = (item: JourneyRoute) => (item.accessTransfers?.length ?? 0) + (item.egressTransfers?.length ?? 0) + item.transfers.filter(t => t.kind === 'external').length
@@ -108,8 +96,6 @@ function applyDataset(next: MetroDataset) {
     calculate()
   } catch (e) { maintenanceError.value = `保存失败：${(e as Error).message}。草稿已保留，请先导出备份。` }
 }
-const originPath = computed(() => combination.value?.originPath ?? route.value?.originPath)
-const destinationPath = computed(() => combination.value?.destinationPath ?? route.value?.destinationPath)
 function backupDataset() {
   backupText.value = JSON.stringify(data, null, 2)
   uni.setClipboardData({ data: backupText.value,
@@ -119,16 +105,23 @@ function backupDataset() {
 }
 calculate()
 watch(() => props.fixture, value => {
-  if (import.meta.env.DEV && value === 'long-names' && !longNamesApplied.value) {
-    useDataset('demo'); applyLongStationNames(data); longNamesApplied.value = true; calculate()
+  if (!import.meta.env.DEV || fixtureApplied.value || !['long-names', 'blocked-lift'].includes(value ?? '')) return
+  useDataset('demo')
+  if (value === 'long-names') applyLongStationNames(data)
+  else {
+    // Isolated development fault injection. Never modifies or saves the real Fuzhou dataset.
+    data.walkEdges.forEach(edge => { if (edge.kind === 'lift') edge.wheelchair = 'blocked' })
+    to.value = 's-east'; mode.value = 'elevator'
+    personalNotice.value = '不可达界面测试：合成通路设为不可通行，不代表福州真实电梯覆盖情况。'
   }
+  fixtureApplied.value = true; calculate()
 }, { immediate: true })
 </script>
 
 <template>
   <view class="app-shell">
     <view class="topbar">
-      <view class="brand"><view class="brand-mark">榕</view><text class="brand-name">榕行</text></view>
+      <view class="brand"><view class="brand-mark">榕</view><text class="brand-name">榕行</text><text class="page-label">路线详情</text></view>
       <view class="top-actions"><button class="city-tag" aria-label="切换线网" @tap="sheet = 'scenarios'">福州 · {{ isDemo ? '演示' : '运营' }} ⌄</button><button class="text-button" aria-label="数据说明" @tap="sheet = 'data'">数据说明</button></view>
     </view>
 
@@ -139,7 +132,7 @@ watch(() => props.fixture, value => {
         <button class="station-field" aria-label="选择终点" @tap="openPicker('to')"><text class="field-label destination-label">到</text><text class="field-value">{{ stationName(to) }}</text><text class="field-chevron">⌄</text></button>
         <button class="swap-button" aria-label="交换起终点" @tap="swap">⇅</button>
       </view>
-      <view class="mode-options"><button v-for="item in modes" :key="item.id" :class="['mode-button', { active: mode === item.id }]" :aria-label="item.name" @tap="changeMode(item.id)"><text class="mode-icon">{{ item.icon }}</text><text>{{ item.name }}</text></button></view>
+      <view class="mode-options"><button v-for="item in modes" :key="item.id" :class="['mode-button', { active: mode === item.id }]" :aria-label="item.name" :aria-pressed="mode === item.id" @tap="changeMode(item.id)"><text class="mode-icon">{{ item.icon }}</text><text>{{ item.name }}</text></button></view>
       <text v-if="mode !== 'shortest'" class="mode-description">{{ currentMode.desc }}</text>
       <button v-if="!result || editing" class="primary-button calculate-button" :loading="busy" @tap="calculate">规划我的路线 <text>→</text></button>
     </view>
@@ -147,54 +140,18 @@ watch(() => props.fixture, value => {
     <view class="demo-note">{{ isDemo ? '合成演示 · 不可用于真实乘车' : '真实运营线网 · 精细指引待逐站采集' }}</view>
     <view v-if="personalNotice" class="notice">{{ personalNotice }}</view>
     <view v-if="!result" class="empty-card"><text class="empty-title">起终点已更新</text><text class="empty-message">点击“规划我的路线”，查看乘车方案和推荐车门。</text></view>
-    <view v-else-if="!route" class="empty-card"><text class="empty-title">{{ errorTitle }}</text><text v-for="(message, i) in errorMessages" :key="i" class="empty-message">{{ message }}</text><text v-if="mode === 'elevator' && result?.status === 'incomplete'" class="empty-message">电梯位置与衔接通道尚需录入，资料未确认前不生成无障碍指引。</text><button class="secondary-button" @tap="openPicker('to')">重新选择终点</button></view>
+    <view v-else-if="!route" class="empty-card"><text class="empty-title">{{ errorTitle }}</text><text v-for="(message, i) in actionableErrors" :key="i" class="empty-message">{{ message }}</text><text v-if="mode === 'elevator' && result?.status === 'incomplete'" class="empty-message">电梯位置与衔接通道尚需录入，资料未确认前不生成无障碍指引。</text><button v-if="mode === 'elevator'" class="secondary-button" @tap="changeMode('shortest')">切换为最近路线</button><button class="secondary-button" @tap="openPicker('to')">重新选择终点</button><button class="utility-button" @tap="toggle('diagnostics')"><text>查看规划检查详情</text><text>{{ expanded.includes('diagnostics') ? '−' : '＋' }}</text></button><view v-if="expanded.includes('diagnostics')"><text v-for="(message, i) in result.diagnostics" :key="i" class="empty-message">{{ message }}</text></view></view>
 
     <template v-if="route && result">
       <view class="route-summary">
-        <view class="route-summary-main"><text class="summary-title">{{ !route.legs.length ? '站外衔接方案' : route.granularity === 'detailed' ? (selectedRoute === 0 ? currentMode.name + '优选' : '备选方案 ' + (selectedRoute + 1)) : '基础乘车方案' }}</text><view class="summary-metrics"><text class="summary-time">{{ !route.legs.length ? '无需乘车' : route.totalMinutes === null ? stopCount(route) + ' 站' : minutes(route.totalMinutes) + ' 分钟' }}</text><text v-if="route.legs.length">{{ route.transferCount ? route.transferCount + ' 次换乘' : '直达' }}</text></view><text class="summary-walk">{{ route.walkingMetres === null ? '通路距离、耗时与楼梯信息待补' : '步行 ' + Math.round(route.walkingMetres) + ' 米 · ' + route.stairCount + ' 级普通楼梯' }}</text></view>
-        <button v-if="result.routes.length > 1" class="change-route-button" aria-label="比较方案" @tap="sheet = 'routes'">换方案<text>{{ result.routes.length }} 个可选 ⌄</text></button>
+        <view class="route-summary-main"><text class="summary-title">{{ !route.legs.length ? '站外衔接方案' : route.granularity === 'detailed' ? (selectedRoute === 0 ? currentMode.name + '优选' : '备选方案 ' + (selectedRoute + 1)) : '基础乘车方案' }}</text><view class="summary-metrics"><text class="summary-time">{{ !route.legs.length ? '无需乘车' : stopCount(route) + ' 站' }}</text><text v-if="route.legs.length" class="summary-transfer">{{ route.transferCount ? '换乘 ' + route.transferCount + ' 次' : '直达' }}</text><text v-if="route.totalMinutes !== null && route.legs.length" class="summary-estimate">估算 {{ minutes(route.totalMinutes) }} 分钟</text></view><text v-if="route.walkingMetres !== null" class="summary-walk">步行 {{ Math.round(route.walkingMetres) }} 米 · {{ route.stairCount }} 级普通楼梯</text></view>
+        <button v-if="result.routes.length > 1" class="change-route-button" aria-label="比较方案" @tap="sheet = 'routes'">比较方案<text>{{ result.routes.length }} 个可选 ⌄</text></button>
       </view>
-      <view v-if="route.granularity !== 'detailed'" class="notice">{{ !route.legs.length ? '已知两站需要出站衔接；具体入口、站外距离及连续无障碍通路尚未核实。' : mode === 'elevator' ? '福州电梯全覆盖。以下仅为乘车路线，具体电梯、轮椅通道及连续衔接尚未核实，不能作为完整无障碍导航。' : '站内资料尚未录全，当前按换乘次数和乘车站数比较方案。三种模式的精细差异待实测通路补充后计算。' }}</view>
+      <view v-if="route.granularity !== 'detailed'" class="coverage-note"><text class="coverage-title">{{ mode === 'elevator' ? '连续无障碍指引待核实' : '精细指引待补充' }}</text><text class="coverage-detail">{{ !route.legs.length ? '具体出入口、距离与连续通路尚未核实。' : mode === 'elevator' ? (isDemo ? '演示站内资料尚不完整，以下仅为基础乘车路线，不能作为连续无障碍导航。' : '福州电梯全覆盖；具体电梯与衔接通路尚未核实，以下仅供查看基础乘车路线。') : '车厢、车门与设施逐站采集中；当前按换乘次数和站数比较。' }}</text></view>
       <view v-else-if="result.status === 'incomplete'" class="notice">部分候选资料或搜索范围尚不完整，请查看规划依据。</view>
       <view v-if="searchLimited" class="notice">候选方案尚未全部比较，当前结果可能还有更优备选。详情见“规划依据与数据边界”。</view>
 
-      <view class="journey-card">
-        <ExternalConnection v-for="(guide, ai) in route.accessTransfers" :key="'access-' + ai" :guide="guide"/>
-        <view v-for="(leg, index) in route.legs" :key="index" class="leg-block">
-          <view class="leg-header"><view class="step-number" :style="{ background: leg.lineColor, color: lineInk(leg.lineColor) }">{{ index + 1 }}</view><view class="leg-heading-text"><text class="stop-name">{{ leg.fromStationName }}</text><text class="stop-action">{{ index === 0 ? '上车' : '换乘后上车' }}</text></view></view>
-          <view class="leg-content">
-            <view class="line-heading"><text class="line-badge" :style="{ background: leg.lineColor, color: lineInk(leg.lineColor) }">{{ leg.lineName }}</text><text class="direction">往 {{ leg.direction }} 方向</text></view>
-            <text class="leg-target">在 <text class="target-station">{{ leg.toStationName }}</text> 下车</text>
-            <view v-if="index === 0" class="next-action"><text class="next-label">下一步</text><text>{{ originPath?.instructions[0]?.split('，')[0] ?? '按站内标识前往上述方向站台' }}</text></view>
-            <view class="door-card">
-              <text class="door-eyebrow">{{ leg.recommendationStatus === 'local' ? '局部下车推荐 · 仅依据已录入通路' : index < route.legs.length - 1 ? '为换乘推荐的候车位置' : '为前往站厅推荐的候车位置' }}</text>
-              <view v-if="currentDoor(index)" class="door-number"><text>{{ currentDoor(index)?.car }}</text><text class="door-unit">号车厢</text><text class="door-divider">/</text><text>{{ currentDoor(index)?.door }}</text><text class="door-unit">号门</text></view>
-              <text v-else class="pending-title">推荐车厢、车门待补充</text>
-              <view class="train-cars"><view v-for="car in formationForLeg(index)?.cars ?? 0" :key="car" :class="['car', { 'car-active': currentDoor(index)?.car === car }]"><text>{{ car }}车</text><view v-if="currentDoor(index)" class="car-doors"><view v-for="door in formationForLeg(index)?.positions.filter(p => p.car === car && (leg.recommendationStatus === 'complete' || leg.recommendations.some(r => r.positionId === p.id)))" :key="door.id" :class="{ 'door-active': currentDoor(index)?.car === car && currentDoor(index)?.door === door.door }"/></view></view></view>
-              <text v-if="!isDemo" class="door-note">编组数量示意，不表示行进方向或完整门位布局。</text>
-              <text class="door-note">{{ formationForLeg(index)?.cars }} 节编组。{{ currentDoor(index) ? '请按已核实编号及现场标识候车。' : formationForLeg(index)?.positions.length && formationForLeg(index)?.numberingStatus !== 'unknown' ? '本站门位映射或通路尚未核实。' : '每节车厢门数与编号规则未提供，不推测门位。' }}</text>
-              <template v-if="leg.recommendationStatus === 'local'"><text v-for="(basis, bi) in leg.recommendationBasis" :key="bi" class="door-note">{{ basis }}</text><text v-if="leg.recommendations.length > 1" class="local-choices">等价位置：{{ leg.recommendations.map(p => p.car + '车' + p.door + '门').join('、') }}</text></template>
-              <button v-if="route.doorCombinations.length > 1" class="equivalent-button" aria-label="切换推荐车门" @tap="sheet = 'doors'"><text>{{ route.doorCombinations.length }} 组等价位置，可切换</text><text>⌄</text></button>
-            </view>
-            <view v-if="leg.recommendationStatus === 'local' && leg.arrivalPath" class="origin-guide"><text class="guide-title">已录入的到达站局部通路</text><view v-for="(instruction, li) in leg.arrivalPath.instructions" :key="li" class="instruction-row"><text class="instruction-index">{{ li + 1 }}</text><text>{{ instruction }}</text></view></view>
-            <view class="leg-meta"><text>{{ leg.stopCount }} 站{{ leg.rideMinutes === null ? '' : ' · 行车约 ' + minutes(leg.rideMinutes) + ' 分钟' }}</text><button class="stops-toggle" @tap="toggle('stops-' + index)">{{ expanded.includes('stops-' + index) ? '收起站点' : '途经车站' }} ⌄</button></view>
-            <view v-if="expanded.includes('stops-' + index)" class="stops-list"><text v-for="stop in viaStations(index)" :key="stop.stationId" class="via-stop">{{ stationName(stop.stationId) }}</text></view>
-            <view v-if="index === 0 && originPath" class="origin-guide"><text class="guide-title">上车前 · 从付费站厅前往站台</text><view v-for="(instruction, ii) in originPath.instructions" :key="ii" class="instruction-row"><text class="instruction-index">{{ ii + 1 }}</text><text>{{ instruction }}</text></view></view>
-          </view>
-
-          <view class="arrival-heading"><text class="arrival-dot" :style="{ borderColor: leg.lineColor }"/><text class="stop-name">{{ leg.toStationName }}</text><text class="stop-action">下车</text></view>
-          <view v-if="route.transfers[index]" class="transfer-card">
-            <view class="transfer-title"><text>{{ route.transfers[index].kind === 'external' ? '出站换乘' : '换乘' }} {{ route.transfers[index].toLineName }}</text><text class="transfer-distance">{{ pathForTransfer(index) ? Math.round(pathForTransfer(index)!.metres) + ' 米' : '通路距离待补' }}</text></view>
-            <view v-if="currentDoor(index)" class="instruction-row first-step"><text class="instruction-index">1</text><text>从 {{ currentDoor(index)?.car }} 号车厢 {{ currentDoor(index)?.door }} 号门下车。</text></view>
-            <view v-for="(instruction, ii) in pathForTransfer(index)?.instructions" :key="ii" class="instruction-row"><text class="instruction-index">{{ ii + 2 }}</text><text>{{ instruction }}</text></view>
-            <template v-if="!pathForTransfer(index)"><text v-for="(instruction, ti) in route.transfers[index].instructions" :key="ti" class="instruction-row">{{ instruction }}</text><text class="door-note">设施位置与车门衔接待采集，请核对现场标识。</text></template>
-            <view v-if="route.granularity === 'detailed'" class="instruction-row first-step"><text class="instruction-index">✓</text><text>到 {{ currentDoor(index + 1)?.car }} 号车厢 {{ currentDoor(index + 1)?.door }} 号门，乘坐下一段列车。</text></view>
-          </view>
-        </view>
-
-        <ExternalConnection v-for="(guide, ei) in route.egressTransfers" :key="'egress-' + ei" :guide="guide"/>
-        <view class="destination-card"><text class="guide-title">抵达 {{ stationName(to) }}{{ route.legs.length ? ' · 前往付费站厅' : '' }}</text><view v-for="(instruction, ii) in destinationPath?.instructions" :key="ii" class="instruction-row"><text class="instruction-index">{{ ii + 1 }}</text><text>{{ instruction }}</text></view><text v-if="!destinationPath && route.legs.length" class="destination-note">站台至站厅的精细指引待补充。</text><text class="destination-note">尚未指定具体出口。</text></view>
-      </view>
+      <RouteTimeline :key="route.id + '-' + mode" :route="route" :dataset="data" :combination-index="selectedCombination" :demo="isDemo" :destination-name="stationName(to)" @select-combination="selectCombination" @open-combinations="sheet = 'doors'"/>
       <view v-if="route.equalChoicesTruncated" class="notice">等价组合较多，当前仅展示部分最优组合。</view>
       <text class="estimate-note">{{ isDemo ? '时间不含候车，仅为演示行车与站内步行估算。' : '尚未接入时刻表；不推测乘车耗时或具体电梯通路。滨海快线按普通车停站规划。' }}</text>
       <button class="utility-button" @tap="toggle('diagnostics')"><text>规划依据与数据边界</text><text>{{ expanded.includes('diagnostics') ? '−' : '+' }}</text></button>
@@ -226,24 +183,25 @@ watch(() => props.fixture, value => {
 </template>
 
 <style scoped>
-.app-shell { max-width: 560px; margin: 0 auto; padding: 0 16px; color: #1e342a; font-size: 15px; line-height: 1.55; }
+.app-shell { max-width: 540px; margin: 0 auto; padding: 0 12px; color: #243e35; font-size: 15px; line-height: 1.55; }
 /* Keep native mini-program buttons independent of app-level style isolation. */
 .city-tag,.text-button,.compact-trip,.station-field,.swap-button,.mode-button,.primary-button,.secondary-button,.change-route-button,.equivalent-button,.stops-toggle,.utility-button,.close-button,.station-choice,.scenario-item,.route-option,.combination-button { margin: 0; line-height: 1.5; font-family: inherit; font-size: inherit; }
 .city-tag::after,.text-button::after,.compact-trip::after,.station-field::after,.swap-button::after,.mode-button::after,.primary-button::after,.secondary-button::after,.change-route-button::after,.equivalent-button::after,.stops-toggle::after,.utility-button::after,.close-button::after,.station-choice::after,.scenario-item::after,.route-option::after,.combination-button::after { border: none; }
 .app-shell :deep(uni-button) { line-height: 1.5; }
 .app-shell :deep(uni-button)::after { border: none; }
 .app-shell button { line-height: 1.5; }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 64px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; }
 .brand { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
 .brand-mark { width: 31px; height: 31px; background: #176b52; border-radius: 9px; color: #fff; text-align: center; line-height: 31px; font-size: 18px; font-weight: 650; }
 .brand-name { font-size: 24px; font-weight: 750; letter-spacing: 1px; }
+.page-label { font-size: 13px; color: #62736b; padding-left: 8px; border-left: 1px solid #d4ded7; }
 .top-actions { display: flex; align-items: center; gap: 4px; }
 .city-tag,.text-button { min-height: 48px; padding: 10px 8px; font-size: 13px; display: flex; align-items: center; color: #526852; background: transparent; }
-.planner-card { padding: 10px 12px 12px; background: #fff; border: 1px solid #dce4d7; border-radius: 14px; }
+.planner-card { padding: 6px 10px 10px; background: #fff; border: 1px solid #dce5df; border-radius: 11px; position: sticky; top: 0; z-index: 20; box-shadow: 0 3px 12px #233f3210; }
 .compact-trip { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 7px 2px; text-align: left; background: transparent; }
 .compact-endpoints { font-size: 19px; font-weight: 650; line-height: 1.5; flex: 1; min-width: 0; word-break: break-all; }
 .compact-arrow { color: #5a7751; margin: 0 4px; }
-.compact-edit { min-height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #2d6340; font-size: 14px; font-weight: 500; background: #edf4e5; border-radius: 8px; }
+.compact-edit { min-height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #285e49; font-size: 14px; font-weight: 500; background: #eef4f0; border-radius: 8px; }
 .trip-fields { padding-right: 48px; position: relative; }
 .station-field { display: flex; align-items: center; width: 100%; min-height: 52px; padding: 8px 4px; gap: 10px; text-align: left; background: transparent; }
 .station-field + .station-field { border-top: 1px solid #e5eadf; }
@@ -252,77 +210,29 @@ watch(() => props.fixture, value => {
 .field-value { font-size: 19px; font-weight: 650; line-height: 1.45; min-width: 0; flex: 1; overflow-wrap: anywhere; word-break: break-all; }
 .field-chevron { color: #647c60; font-size: 18px; flex-shrink: 0; }
 .swap-button { position: absolute; right: -4px; top: 50%; margin-top: -24px; width: 48px; height: 48px; min-height: 48px; border: 1px solid #dce4d4; background: #f5f8f0; border-radius: 10px; font-size: 27px; display: flex; align-items: center; justify-content: center; color: #2f6d4c; }
-.mode-options { display: flex; gap: 7px; margin-top: 8px; }
-.mode-button { min-width: 0; min-height: 48px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #dce4d5; border-radius: 8px; color: #52634b; background: #f7f9f3; font-size: 13px; font-weight: 550; padding: 8px 3px; }
-.mode-button.active { border-color: #277653; background: #e7f0df; color: #155837; box-shadow: inset 0 0 0 1px #277653; }
+.mode-options { display: flex; gap: 4px; margin-top: 3px; padding: 3px; background: #f0f4f1; border-radius: 8px; }
+.mode-button { min-width: 0; min-height: 48px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid transparent; border-radius: 6px; color: #52675b; background: transparent; font-size: 14px; font-weight: 550; padding: 8px 2px; }
+.mode-button.active { border-color: #176b52; background: #176b52; color: #fff; }
 .mode-icon { font-size: 18px; }
 .mode-description { display: block; margin-top: 9px; font-size: 13px; color: #52684b; }
 .primary-button,.secondary-button { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-radius: 9px; padding: 12px 16px; font-size: 16px; font-weight: 600; }
 .primary-button { background: #176b52; color: #fff; width: 100%; }
 .calculate-button { margin-top: 12px; }
 .secondary-button { background: #e6efdd; color: #225d3b; margin-top: 18px; justify-content: center; }
-.demo-note { font-size: 12px; color: #796334; padding: 10px 3px 4px; }
+.demo-note { font-size: 13px; color: #77613c; padding: 10px 2px 0; }
 .route-summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 2px 15px; }
 .route-summary-main { flex: 1; min-width: 0; }
 .summary-title { display: block; color: #356143; font-size: 14px; font-weight: 650; margin-bottom: 3px; }
 .summary-metrics { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; font-size: 14px; color: #4b6046; }
-.summary-time { font-size: 23px; font-weight: 700; color: #213c29; }
+.summary-time { font-size: 26px; line-height: 1.3; font-weight: 750; color: #233e32; }
+.summary-transfer { font-weight: 650; color: #334f40; }.summary-estimate { font-size: 13px; color: #617466; }
 .summary-walk { display: block; font-size: 13px; color: #576b4d; margin-top: 4px; }
-.change-route-button { min-width: 76px; min-height: 60px; border: 1px solid #d8e3cc; background: #f0f5e9; border-radius: 9px; padding: 8px; color: #2b6240; font-size: 15px; font-weight: 600; flex-shrink: 0; }
+.change-route-button { min-width: 80px; min-height: 56px; border: 1px solid #d8e3dc; background: #fff; border-radius: 8px; padding: 8px; color: #2b6248; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+.coverage-note { background: #f2efe5; border-left: 3px solid #b29a61; border-radius: 0 6px 6px 0; padding: 9px 11px; margin-bottom: 12px; }.coverage-title { display: block; font-size: 14px; font-weight: 650; color: #69552e; }.coverage-detail { display: block; margin-top: 2px; font-size: 13px; line-height: 1.65; color: #6f6249; }
 .change-route-button text { display: block; font-size: 12px; font-weight: 400; margin-top: 3px; }
-.journey-card { background: #fff; border: 1px solid #dce4d4; border-radius: 14px; overflow: hidden; }
-.leg-block { padding: 18px 16px 0; }
-.leg-block + .leg-block { border-top: 1px solid #e3e9db; padding-top: 22px; }
-.leg-header { display: flex; align-items: flex-start; gap: 10px; }
-.step-number { width: 27px; height: 27px; line-height: 27px; margin-top: 3px; text-align: center; border-radius: 8px; color: #fff; font-size: 15px; font-weight: 650; flex-shrink: 0; }
-.leg-heading-text { min-width: 0; flex: 1; }
-.stop-name { font-size: 22px; line-height: 1.45; font-weight: 700; overflow-wrap: anywhere; word-break: break-all; }
-.stop-action { font-size: 13px; color: #576d4d; margin-left: 9px; white-space: nowrap; }
-.leg-content { padding-top: 13px; }
-.line-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.line-badge { display: inline-block; padding: 5px 9px; border-radius: 5px; color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0; }
-.direction { font-size: 17px; line-height: 1.55; font-weight: 650; color: #314e36; min-width: 0; word-break: break-all; }
-.leg-target { display: block; margin: 11px 0 13px; font-size: 16px; line-height: 1.6; color: #455d3c; word-break: break-all; }
-.target-station { font-weight: 700; color: #243e27; }
-.next-action { display: flex; align-items: baseline; gap: 9px; padding: 10px 0 14px; font-size: 14px; line-height: 1.6; color: #365b35; }
-.next-label { font-size: 12px; flex-shrink: 0; padding: 2px 5px; border-radius: 4px; background: #edf3e5; color: #45633c; }
-.door-card { padding: 15px; background: #edf5e6; border: 1px solid #ccdcbc; border-radius: 11px; }
-.door-eyebrow { font-size: 13px; color: #48663b; display: block; }
-.pending-title { display: block; font-size: 20px; font-weight: 700; line-height: 1.6; margin: 8px 0 12px; color: #255a3b; }
-.local-choices { display: block; font-size: 16px; font-weight: 650; margin-top: 10px; overflow-wrap: anywhere; }
-.maintenance-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 120; overflow-y: auto; background: #f6f8f0; }
-.backup-text { width: 100%; height: 200px; padding: 10px; border: 1px solid #c6d6b8; border-radius: 8px; margin-top: 12px; font-size: 14px; background: #fff; }
-.door-number { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; margin: 4px 0 13px; color: #165f3d; font-size: 38px; line-height: 1.4; font-weight: 750; }
-.door-unit { font-size: 17px; font-weight: 600; }
-.door-divider { font-size: 22px; font-weight: 400; color: #729363; margin: 0 1px; }
-.train-cars { display: flex; gap: 5px; }
-.car { flex: 1; min-width: 0; padding: 5px 2px; background: #e0e9d4; border-radius: 5px; color: #4f6842; text-align: center; font-size: 13px; }
-.car-active { background: #267454; color: #fff; }
-.car-doors { display: flex; justify-content: space-evenly; gap: 3px; margin-top: 4px; }
-.car-doors view { width: 6px; height: 3px; border-radius: 2px; background: #adbe9a; }
-.car-doors view.door-active { background: #ffe1a1; box-shadow: 0 0 0 1px #e5c36f; }
-.door-note { display: block; font-size: 12px; color: #526b44; line-height: 1.6; margin-top: 10px; }
-.equivalent-button { display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left; width: 100%; min-height: 48px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #cdddbc; color: #235f3c; font-size: 14px; background: transparent; }
-.leg-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: 9px 0; color: #526849; font-size: 14px; }
-.stops-toggle { padding: 10px 4px; min-height: 48px; background: transparent; color: #285f3c; font-size: 14px; }
-.stops-list { display: flex; flex-direction: column; gap: 8px; border-left: 2px solid #b9cca9; padding: 4px 12px; margin: 0 0 16px 5px; }
-.via-stop { color: #465f3b; font-size: 14px; word-break: break-all; }
-.origin-guide { padding: 14px 0 18px; border-top: 1px solid #e2e9d9; }
-.guide-title { display: block; font-size: 15px; font-weight: 650; color: #365b35; margin-bottom: 10px; line-height: 1.65; word-break: break-all; }
-.instruction-row { display: flex; align-items: baseline; gap: 9px; font-size: 15px; line-height: 1.75; color: #4c5d44; margin-top: 11px; overflow-wrap: anywhere; word-break: break-all; }
-.instruction-row > text:last-child { flex: 1; min-width: 0; }
-.instruction-index { flex-shrink: 0; width: 22px; height: 22px; line-height: 21px; border: 1px solid #c5d4b7; color: #45633a; background: #f3f7ed; border-radius: 50%; text-align: center; font-size: 12px; }
-.arrival-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0; padding: 12px 0 14px; }
-.arrival-dot { width: 12px; height: 12px; border: 3px solid; border-radius: 50%; margin-right: 12px; flex-shrink: 0; }
-.arrival-heading .stop-name { min-width: 0; max-width: calc(100% - 24px); }
-.transfer-card { padding: 16px; background: #f6f2e7; border: 1px solid #e2d9be; border-radius: 10px; margin-bottom: 20px; }
-.transfer-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 17px; font-weight: 650; color: #6a542a; margin-bottom: 13px; }
-.transfer-distance { font-size: 14px; font-weight: 500; }
-.transfer-card .instruction-row { color: #66583b; }
-.transfer-card .instruction-index { color: #6c592d; border-color: #d2c49f; background: #fcf9ef; }
-.first-step { font-weight: 600; }
-.destination-card { padding: 18px 16px; background: #f0f5e9; border-top: 1px solid #d9e4cc; }
-.destination-note { display: block; margin-top: 12px; color: #576c4b; font-size: 13px; }
+.maintenance-backdrop { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 120; overflow-y: auto; background: #f6f8f7; }
+.backup-text { width: 100%; height: 200px; padding: 10px; border: 1px solid #c6d6ce; border-radius: 8px; margin-top: 12px; font-size: 14px; background: #fff; }
+.line-badge { display: inline-block; padding: 5px 9px; border-radius: 5px; font-size: 14px; font-weight: 600; }
 .estimate-note { display: block; font-size: 13px; line-height: 1.7; color: #52664a; padding: 14px 3px 4px; }
 .utility-button { width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: space-between; text-align: left; gap: 10px; border-bottom: 1px solid #dde5d5; padding: 12px 3px; color: #42613e; background: transparent; font-size: 14px; }
 .footer-tools { margin-top: 12px; }
@@ -371,12 +281,9 @@ watch(() => props.fixture, value => {
   .top-actions { gap: 0; }
   .city-tag,.text-button { padding-left: 5px; padding-right: 5px; }
   .brand-name { font-size: 22px; }
+  .page-label { display: none; }
   .mode-button { padding-left: 1px; padding-right: 1px; gap: 3px; }
   .mode-icon { font-size: 16px; }
-  .leg-block { padding-left: 12px; padding-right: 12px; }
-  .door-card { padding: 13px 11px; }
-  .door-number { gap: 5px; font-size: 35px; }
-  .door-unit { font-size: 16px; }
   .modal-sheet { padding-left: 14px; padding-right: 14px; }
 }
 </style>
