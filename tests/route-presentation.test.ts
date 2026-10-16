@@ -1,9 +1,37 @@
 import { describe, expect, it } from 'vitest'
 import { planJourney } from '../src/core'
 import { demoDataset } from '../src/data/demo'
-import { arrivalPathFor, facilitiesIn, positionChoices } from '../src/components/route-presentation'
+import { arrivalPathFor, facilitiesIn, groupEquivalentPositions, positionChoices, recommendationFacilities, transferOverview } from '../src/components/route-presentation'
 
 describe('route detail presentation preserves planner evidence', () => {
+  it('groups equivalent doors equally by car without losing positions or mutating choices', () => {
+    const choices = [
+      { position: { car: 6, door: 3, positionId: 'a' }, combinationIndex: 0 },
+      { position: { car: 1, door: 2, positionId: 'b' }, combinationIndex: 1 },
+      { position: { car: 1, door: 1, positionId: 'c' }, combinationIndex: 2 },
+      { position: { car: 1, door: 2, positionId: 'b' }, combinationIndex: 3 },
+    ]
+    expect(groupEquivalentPositions(choices)).toEqual([{ car: 1, doors: [1, 2] }, { car: 6, doors: [3] }])
+    expect(choices[0].position.car).toBe(6)
+    expect(groupEquivalentPositions([])).toEqual([])
+  })
+
+  it('summarizes only recorded transfer facilities and keeps missing paths explicitly unknown', () => {
+    const route = planJourney(demoDataset, { from: 's-west', to: 's-bay', mode: 'elevator' }).routes[0]
+    const guide = route.transfers[0]
+    expect(transferOverview(guide, guide.path)).toBe('经电梯前往2号线站台')
+    expect(transferOverview(guide, null)).toContain('待核实')
+    expect(transferOverview(guide, null)).not.toContain('电梯')
+    const external = { ...guide, kind: 'external' as const, instructions: ['出站前往另一车站重新进站'] }
+    expect(transferOverview(external, null)).toBe(external.instructions[0])
+  })
+
+  it('shows facility alternatives across all equivalent combinations instead of only the first', () => {
+    const route = planJourney(demoDataset, { from: 's-west', to: 's-river', mode: 'shortest' }).routes[0]
+    const alternate = planJourney(demoDataset, { from: 's-west', to: 's-river', mode: 'few-stairs' }).routes[0]
+    route.doorCombinations = [route.doorCombinations[0], alternate.doorCombinations[0]]
+    expect(recommendationFacilities(route, 0)).toEqual(['stairs', 'escalator'])
+  })
   it('lists all equal positions while retaining their full journey correlation', () => {
     const route = planJourney(demoDataset, { from: 's-west', to: 's-bay', mode: 'shortest' }).routes[0]
     route.doorCombinations = [route.doorCombinations[0], route.doorCombinations.at(-1)!]

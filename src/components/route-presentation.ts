@@ -1,4 +1,4 @@
-import type { DoorRecommendation, JourneyRoute, WalkEdge, WalkPath } from '../core/types'
+import type { DoorRecommendation, JourneyRoute, TransferGuide, WalkEdge, WalkPath } from '../core/types'
 
 export type FacilityKind = Exclude<WalkEdge['kind'], 'walk'>
 export const facilityNames: Record<FacilityKind, string> = { stairs: '楼梯', escalator: '扶梯', lift: '电梯' }
@@ -10,6 +10,29 @@ export const compactInstruction = (instruction: string, stationName: string): st
   instruction.split(stationName).join('').replace('（出口未指定）', '')
 
 export interface PositionChoice { position: DoorRecommendation; combinationIndex: number | null }
+
+export function groupEquivalentPositions(choices: PositionChoice[]): { car: number; doors: number[] }[] {
+  const groups = new Map<number, Set<number>>()
+  for (const { position } of choices) {
+    if (!groups.has(position.car)) groups.set(position.car, new Set())
+    groups.get(position.car)!.add(position.door)
+  }
+  return [...groups].sort(([a], [b]) => a - b).map(([car, doors]) => ({ car, doors: [...doors].sort((a, b) => a - b) }))
+}
+
+export function transferOverview(guide: TransferGuide, path?: WalkPath | null): string {
+  if (guide.kind === 'external') return guide.instructions[0] ?? '出站换乘，具体通路待核实'
+  if (!path) return `前往${guide.toLineName.replace('演示', '')}，具体换乘通路待核实`
+  const names = facilitiesIn(path).map(kind => facilityNames[kind]).join('、')
+  return `${names ? '经' + names : '沿平层通道'}前往${guide.toLineName.replace('演示', '')}站台`
+}
+
+export function recommendationFacilities(route: JourneyRoute, index: number): FacilityKind[] {
+  const paths = route.doorCombinations.length
+    ? route.doorCombinations.map((_, ci) => arrivalPathFor(route, index, ci))
+    : [arrivalPathFor(route, index, 0)]
+  return [...new Set(paths.flatMap(facilitiesIn))]
+}
 /** Keep a position linked to a complete compatible journey, never build a Cartesian product in the UI. */
 export function positionChoices(route: JourneyRoute, legIndex: number, selectedCombination: number): PositionChoice[] {
   const choices = new Map<string, PositionChoice>()
