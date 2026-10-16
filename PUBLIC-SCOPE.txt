@@ -4,7 +4,7 @@ Included
 - src/: uni-app Vue 3 application, routing engine, network data and import UI
 - scripts/: data validation, conversion and network maintenance tools
 - tests/: automated core and data-entry tests
-- data-entry/: synthetic examples for trying the local station editor
+- data-entry/: editable Fuzhou station maintenance workbook and synthetic editor examples
 - package.json, package-lock.json, index.html and TypeScript/Vite/Vitest config
 
 Excluded from this public repository
