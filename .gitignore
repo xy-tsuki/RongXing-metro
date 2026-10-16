@@ -1,0 +1,35 @@
+# Public repository allowlist: only application source, tests, data and build config.
+*
+!/.gitignore
+!/PUBLIC-SCOPE.txt
+!/.gitattributes
+!/index.html
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/vite.config.ts
+!/vitest.config.ts
+!/src/
+!/scripts/
+!/tests/
+!/data-entry/
+
+!/src/**
+!/scripts/**
+!/tests/**
+!/data-entry/**
+
+# Keep local notes, reports, prompts, and Vibe development material private.
+**/*.md
+**/*.MD
+**/README*
+/.npmrc
+/.npm-cache/
+/docs/
+/output/
+/dist/
+/unpackage/
+/node_modules/
+/.git/
+*.local
+.DS_Store

@@ -1,0 +1,2664 @@
+{
+  "schemaVersion": "1.0",
+  "version": "fuzhou-operating-2026-10-16.1",
+  "city": {
+    "id": "fuzhou",
+    "name": "福州"
+  },
+  "description": "真实运营线网及已知编组；站序转录自用户2026年8月附件并以官方开通/换乘资料核对。站内设施、楼层、车门编号和运行耗时未录入，精细指引待补充。F1仅提供普通列车全停基础路线，不代表快车停站或时刻表。",
+  "provenance": {
+    "kind": "official",
+    "source": "用户2026-08附件＋福州市政府、福建省交通运输厅等开通/换乘资料；字段证据见sources及docs/network-sources.md；编组依用户提供",
+    "recordedAt": "2026-10-16"
+  },
+  "sources": [
+    {
+      "id": "post-map-operating-notice",
+      "kind": "official",
+      "title": "免费！延时！福州地铁重要提醒！",
+      "url": "https://www.fzcl.gov.cn/xjwz/wsbs/bmfwcx/jt/202609/t20260930_5378219.htm",
+      "publishedAt": "2026-09-30",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "长乐政府转载福州地铁国庆运营公告仍列出1、2、4、5、6号线及滨海快线，交叉核对附件之后的运营线路集合；不据此推断各站开放状态，不导入假期时刻或优惠"
+      ]
+    },
+    {
+      "id": "attachment-202608",
+      "kind": "user",
+      "title": "用户附件：01.公开版-福州地铁线路3.0-a运营版（至2026年08月）.jpg",
+      "url": null,
+      "publishedAt": "2026-08",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "六条线路的站名、站序、换乘符号和未开放站标记；不是官方出版物"
+      ],
+      "method": "原始4375×3125图片分区放大转录"
+    },
+    {
+      "id": "operating-lines",
+      "kind": "official",
+      "title": "福州再送“出行福包” 邀全国游客春节畅游榕城",
+      "url": "https://www.fuzhou.gov.cn/zwgk/gzdt/tpxw/202602/t20260202_5279764.htm",
+      "publishedAt": "2026-02-02",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "运营线路为1、2、4、5、6号线及滨海快线"
+      ]
+    },
+    {
+      "id": "l4-opening",
+      "kind": "official",
+      "title": "福州地铁4号线后通段今日开通运营 双线闭环串联四城区",
+      "url": "https://zx.fuzhou.gov.cn/zz/csfz/tpxw/202512/t20251210_5255685.htm",
+      "publishedAt": "2025-12-10",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "半洲、建新、洪塘、金牛山后通段已开通，洪塘可与5号线换乘"
+      ]
+    },
+    {
+      "id": "f1-opening",
+      "kind": "official",
+      "title": "今天，滨海快线开通啦！",
+      "url": "https://www.fuzhou.gov.cn/zwgk/gzdt/rcyw/202509/t20250929_5084683.htm",
+      "publishedAt": "2025-09-29",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "滨海快线于2025-09-29载客运营，列车为四节车厢"
+      ]
+    },
+    {
+      "id": "f1-interchange",
+      "kind": "official",
+      "title": "福州滨海快线这样换乘",
+      "url": "https://www.fuzhou.gov.cn/zwgk/gzdt/rcyw/202509/t20250918_5079719.htm",
+      "publishedAt": "2025-09-18",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "福州火车站与1号线、东门与4号线、帝封江与4/5号线可站内换乘；三叉街两站及闽都/水部须出站换乘；滨海西暂缓开放"
+      ]
+    },
+    {
+      "id": "f1-current-service",
+      "kind": "official",
+      "title": "明起福州地铁运营时间全面提前",
+      "url": "https://www.fuzhou.gov.cn/zwgk/gzdt/rcyw/202602/t20260201_5279714.htm",
+      "publishedAt": "2026-02-01",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "普通列车停靠沿线所有运营车站；大站/直达快车停站不同，不可用全停交路代替快车"
+      ]
+    },
+    {
+      "id": "f1-reserves",
+      "kind": "official",
+      "title": "滨海快线线路示意图（发改委附图）",
+      "url": "https://fgw.fuzhou.gov.cn/fgwzwgk/tzgg/202508/P020250801646577570761.pdf",
+      "publishedAt": "2025-08-01",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "盖山、莲花山为预留；工程15站不等于15站全部运营"
+      ]
+    },
+    {
+      "id": "l6-deferred",
+      "kind": "official",
+      "title": "福州地铁6号线开通运营",
+      "url": "https://jtyst.fujian.gov.cn/zwgk/jtyw/mtsy/202209/t20220901_5985680.htm",
+      "publishedAt": "2022-09-01",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "莲花、壶井暂缓开通；梁厝、下洋与1号线换乘，林浦与4号线换乘；附件2026-08仍为灰名"
+      ]
+    },
+    {
+      "id": "extension-progress",
+      "kind": "official",
+      "title": "跑出加速度 福州这两条在建地铁又有新进展",
+      "url": "https://zjj.fuzhou.gov.cn/zwgk/dtxx/zwgk/202607/t20260720_5348279.htm",
+      "publishedAt": "2026-07-20",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "2号线东延、6号线东调仍为建设阶段，建成/调试目标不能作为载客开通证明"
+      ]
+    },
+    {
+      "id": "post-map-extension-progress",
+      "kind": "official",
+      "title": "市住建局优质服务促进地铁建设提质增效",
+      "url": "https://zjj.fuzhou.gov.cn/zwgk/dtxx/zwgk/202609/t20260922_5374620.htm",
+      "publishedAt": "2026-09-22",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "附件之后的新官方进展仍报告6号线东调、2号线东延一期建设投资（截至8月底），未宣布载客开通"
+      ]
+    },
+    {
+      "id": "post-map-road",
+      "kind": "official",
+      "title": "长乐这条新路竣工！将打通滨海快线滨海西站便民通道",
+      "url": "https://www.fzcl.gov.cn/xjwz/zwgk/zfxxgkzdgz/zdjsxm/jsqk/202609/t20260908_5369364.htm",
+      "publishedAt": "2026-09-08",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "检索摘要为车站周边道路竣工，不是车站载客公告"
+      ],
+      "retrieval": "官方搜索摘要可读，正文抓取失败；不用于证明车站已开放"
+    },
+    {
+      "id": "formation-owner",
+      "kind": "user",
+      "title": "本次用户确定的编组数据",
+      "url": null,
+      "publishedAt": "2026-10-16",
+      "checkedAt": "2026-10-16",
+      "claims": [
+        "6号线、F1线4节，其余运营线路6节；每节车门数量、编号和纵向位置均未提供"
+      ]
+    }
+  ],
+  "coverage": {
+    "checkedAt": "2026-10-16",
+    "attachmentDate": "2026-08",
+    "topology": "operating-only",
+    "indoor": "missing",
+    "doorNumbering": "unknown",
+    "rideTimes": "unknown",
+    "accessibility": "按用户明确的福州电梯全覆盖前提；具体连续通路尚未核实",
+    "limitations": [
+      "截至核对日未检索到2号线东延、6号线东调、莲花、壶井、滨海西的新载客开通公告；保留已确认运营快照，不把搜索无结果当作绝对未开通证明。",
+      "F1只计算普通列车基础乘车路线；实际班次及快车停站以现场信息为准。"
+    ]
+  },
+  "stations": [
+    {
+      "id": "fz-象峰",
+      "name": "象峰",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-秀山",
+      "name": "秀山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-罗汉山",
+      "name": "罗汉山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-福州火车站",
+      "name": "福州火车站",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-斗门",
+      "name": "斗门",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-树兜",
+      "name": "树兜",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-屏山",
+      "name": "屏山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-东街口",
+      "name": "东街口",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-南门兜",
+      "name": "南门兜",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-茶亭",
+      "name": "茶亭",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-达道",
+      "name": "达道",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-上藤",
+      "name": "上藤",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-三叉街",
+      "name": "三叉街",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-白湖亭",
+      "name": "白湖亭",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-葫芦阵",
+      "name": "葫芦阵",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-黄山",
+      "name": "黄山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-排下",
+      "name": "排下",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-城门",
+      "name": "城门",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-三角埕",
+      "name": "三角埕",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-胪雷",
+      "name": "胪雷",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-福州火车南站",
+      "name": "福州火车南站",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-安平",
+      "name": "安平",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-梁厝",
+      "name": "梁厝",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-下洋",
+      "name": "下洋",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-三江口",
+      "name": "三江口",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-苏洋",
+      "name": "苏洋",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-沙堤",
+      "name": "沙堤",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-上街",
+      "name": "上街",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-金屿",
+      "name": "金屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-福州大学",
+      "name": "福州大学",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-董屿·福建师大",
+      "name": "董屿·福建师大",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-厚庭",
+      "name": "厚庭",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-桔园洲",
+      "name": "桔园洲",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-洪湾",
+      "name": "洪湾",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-金山",
+      "name": "金山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-金祥",
+      "name": "金祥",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-祥坂",
+      "name": "祥坂",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-宁化",
+      "name": "宁化",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-西洋",
+      "name": "西洋",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-水部",
+      "name": "水部",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-紫阳",
+      "name": "紫阳",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-五里亭",
+      "name": "五里亭",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-前屿",
+      "name": "前屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-上洋",
+      "name": "上洋",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-鼓山",
+      "name": "鼓山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-洋里",
+      "name": "洋里",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-半洲",
+      "name": "半洲",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-建新",
+      "name": "建新",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-洪塘",
+      "name": "洪塘",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-金牛山",
+      "name": "金牛山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-凤凰池",
+      "name": "凤凰池",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-陆庄",
+      "name": "陆庄",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-西门",
+      "name": "西门",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-省立医院",
+      "name": "省立医院",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-东门",
+      "name": "东门",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-三角池",
+      "name": "三角池",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-竹屿",
+      "name": "竹屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-横屿",
+      "name": "横屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-后屿",
+      "name": "后屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-光明港",
+      "name": "光明港",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-鳌峰洲",
+      "name": "鳌峰洲",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-花海公园",
+      "name": "花海公园",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-会展中心",
+      "name": "会展中心",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-林浦",
+      "name": "林浦",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-螺洲温泉",
+      "name": "螺洲温泉",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-帝封江",
+      "name": "帝封江",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-荆溪厚屿",
+      "name": "荆溪厚屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-农林大学",
+      "name": "农林大学",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-阵坂",
+      "name": "阵坂",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-马榕",
+      "name": "马榕",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-凤岗里",
+      "name": "凤岗里",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-浦上大道",
+      "name": "浦上大道",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-霞镜",
+      "name": "霞镜",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-东岭",
+      "name": "东岭",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-台屿",
+      "name": "台屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-盘屿",
+      "name": "盘屿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-吴山",
+      "name": "吴山",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-盖山竹榄",
+      "name": "盖山竹榄",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-义序",
+      "name": "义序",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-螺洲古镇",
+      "name": "螺洲古镇",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-前锦",
+      "name": "前锦",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-龙江",
+      "name": "龙江",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-潘墩",
+      "name": "潘墩",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-樟岚",
+      "name": "樟岚",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-营前",
+      "name": "营前",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-航城",
+      "name": "航城",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-郑和",
+      "name": "郑和",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-十洋",
+      "name": "十洋",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-吴航",
+      "name": "吴航",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-鹤上",
+      "name": "鹤上",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-沙京",
+      "name": "沙京",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-下吴",
+      "name": "下吴",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-万寿",
+      "name": "万寿",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-闽都",
+      "name": "闽都",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-南公园",
+      "name": "南公园",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-三叉街-滨海快线",
+      "name": "三叉街（滨海快线）",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-祥谦",
+      "name": "祥谦",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-首占",
+      "name": "首占",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-大数据",
+      "name": "大数据",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-滨海中央商务区",
+      "name": "滨海中央商务区",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-机场",
+      "name": "机场",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    },
+    {
+      "id": "fz-文岭",
+      "name": "文岭",
+      "concourseNodeIds": [],
+      "indoorData": "missing",
+      "sourceIds": [
+        "attachment-202608"
+      ]
+    }
+  ],
+  "lines": [
+    {
+      "id": "fz-l1",
+      "name": "1号线",
+      "color": "#D92336",
+      "status": "operating",
+      "sourceIds": [
+        "attachment-202608",
+        "operating-lines"
+      ]
+    },
+    {
+      "id": "fz-l2",
+      "name": "2号线",
+      "color": "#158253",
+      "status": "operating",
+      "sourceIds": [
+        "attachment-202608",
+        "operating-lines"
+      ]
+    },
+    {
+      "id": "fz-l4",
+      "name": "4号线",
+      "color": "#D78B19",
+      "status": "operating",
+      "sourceIds": [
+        "attachment-202608",
+        "operating-lines"
+      ]
+    },
+    {
+      "id": "fz-l5",
+      "name": "5号线",
+      "color": "#974781",
+      "status": "operating",
+      "sourceIds": [
+        "attachment-202608",
+        "operating-lines"
+      ]
+    },
+    {
+      "id": "fz-l6",
+      "name": "6号线",
+      "color": "#0875B4",
+      "status": "operating",
+      "sourceIds": [
+        "attachment-202608",
+        "operating-lines"
+      ]
+    },
+    {
+      "id": "fz-f1",
+      "name": "滨海快线（F1线）",
+      "color": "#159EAC",
+      "status": "operating",
+      "sourceIds": [
+        "attachment-202608",
+        "operating-lines"
+      ]
+    }
+  ],
+  "formations": [
+    {
+      "id": "fz-l1-train",
+      "cars": 6,
+      "positions": [],
+      "doorsKnown": false,
+      "numberingStatus": "unknown",
+      "provenance": {
+        "kind": "user",
+        "source": "本次用户明确车辆编组；门数及编号未提供",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "formation-owner"
+      ]
+    },
+    {
+      "id": "fz-l2-train",
+      "cars": 6,
+      "positions": [],
+      "doorsKnown": false,
+      "numberingStatus": "unknown",
+      "provenance": {
+        "kind": "user",
+        "source": "本次用户明确车辆编组；门数及编号未提供",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "formation-owner"
+      ]
+    },
+    {
+      "id": "fz-l4-train",
+      "cars": 6,
+      "positions": [],
+      "doorsKnown": false,
+      "numberingStatus": "unknown",
+      "provenance": {
+        "kind": "user",
+        "source": "本次用户明确车辆编组；门数及编号未提供",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "formation-owner"
+      ]
+    },
+    {
+      "id": "fz-l5-train",
+      "cars": 6,
+      "positions": [],
+      "doorsKnown": false,
+      "numberingStatus": "unknown",
+      "provenance": {
+        "kind": "user",
+        "source": "本次用户明确车辆编组；门数及编号未提供",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "formation-owner"
+      ]
+    },
+    {
+      "id": "fz-l6-train",
+      "cars": 4,
+      "positions": [],
+      "doorsKnown": false,
+      "numberingStatus": "unknown",
+      "provenance": {
+        "kind": "user",
+        "source": "本次用户明确车辆编组；门数及编号未提供",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "formation-owner"
+      ]
+    },
+    {
+      "id": "fz-f1-train",
+      "cars": 4,
+      "positions": [],
+      "doorsKnown": false,
+      "numberingStatus": "unknown",
+      "provenance": {
+        "kind": "user",
+        "source": "本次用户明确车辆编组；门数及编号未提供",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "formation-owner"
+      ]
+    }
+  ],
+  "platforms": [],
+  "services": [
+    {
+      "id": "fz-l1-forward",
+      "lineId": "fz-l1",
+      "direction": "三江口",
+      "formationId": "fz-l1-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-象峰",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-秀山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-罗汉山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州火车站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-斗门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-树兜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-屏山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东街口",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-南门兜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-茶亭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-达道",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-上藤",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三叉街",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-白湖亭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-葫芦阵",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-黄山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-排下",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-城门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三角埕",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-胪雷",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州火车南站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-安平",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-梁厝",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-下洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三江口",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l1-reverse",
+      "lineId": "fz-l1",
+      "direction": "象峰",
+      "formationId": "fz-l1-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-三江口",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-下洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-梁厝",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-安平",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州火车南站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-胪雷",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三角埕",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-城门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-排下",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-黄山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-葫芦阵",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-白湖亭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三叉街",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-上藤",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-达道",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-茶亭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-南门兜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东街口",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-屏山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-树兜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-斗门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州火车站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-罗汉山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-秀山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-象峰",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l2-forward",
+      "lineId": "fz-l2",
+      "direction": "洋里",
+      "formationId": "fz-l2-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-苏洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-沙堤",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-上街",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州大学",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-董屿·福建师大",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-厚庭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-桔园洲",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洪湾",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金祥",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-祥坂",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-宁化",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-西洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-南门兜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-水部",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-紫阳",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-五里亭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-前屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-上洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-鼓山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洋里",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l2-reverse",
+      "lineId": "fz-l2",
+      "direction": "苏洋",
+      "formationId": "fz-l2-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-洋里",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-鼓山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-上洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-前屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-五里亭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-紫阳",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-水部",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-南门兜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-西洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-宁化",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-祥坂",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金祥",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洪湾",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-桔园洲",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-厚庭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-董屿·福建师大",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州大学",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-上街",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-沙堤",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-苏洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l4-forward",
+      "lineId": "fz-l4",
+      "direction": "帝封江",
+      "formationId": "fz-l4-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-半洲",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-建新",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洪塘",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金牛山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-凤凰池",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-陆庄",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-西门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东街口",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-省立医院",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三角池",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-竹屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-横屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-后屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-前屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-光明港",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-鳌峰洲",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-花海公园",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-会展中心",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-林浦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-城门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-螺洲温泉",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-帝封江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l4-reverse",
+      "lineId": "fz-l4",
+      "direction": "半洲",
+      "formationId": "fz-l4-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-帝封江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-螺洲温泉",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-城门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-林浦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-会展中心",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-花海公园",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-鳌峰洲",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-光明港",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-前屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-后屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-横屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-竹屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三角池",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-省立医院",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东街口",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-西门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-陆庄",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-凤凰池",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金牛山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洪塘",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-建新",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-半洲",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l5-forward",
+      "lineId": "fz-l5",
+      "direction": "福州火车南站",
+      "formationId": "fz-l5-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-荆溪厚屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-农林大学",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洪塘",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-阵坂",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-马榕",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-凤岗里",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-浦上大道",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-霞镜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东岭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-台屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-盘屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-吴山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-盖山竹榄",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-义序",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-帝封江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-螺洲古镇",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-前锦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-龙江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州火车南站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l5-reverse",
+      "lineId": "fz-l5",
+      "direction": "荆溪厚屿",
+      "formationId": "fz-l5-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-福州火车南站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-龙江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-前锦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-螺洲古镇",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-帝封江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-义序",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-盖山竹榄",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-吴山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-盘屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-台屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东岭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-霞镜",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-浦上大道",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-凤岗里",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-金山",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-马榕",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-阵坂",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-洪塘",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-农林大学",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-荆溪厚屿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l6-forward",
+      "lineId": "fz-l6",
+      "direction": "万寿",
+      "formationId": "fz-l6-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-潘墩",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-林浦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-樟岚",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-梁厝",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-下洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-营前",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-航城",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-郑和",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-十洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-吴航",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-鹤上",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-沙京",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-下吴",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-万寿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-l6-reverse",
+      "lineId": "fz-l6",
+      "direction": "潘墩",
+      "formationId": "fz-l6-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车",
+      "sourceIds": [
+        "attachment-202608"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-万寿",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-下吴",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-沙京",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-鹤上",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-吴航",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-十洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-郑和",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-航城",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-营前",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-下洋",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-梁厝",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-樟岚",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-林浦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-潘墩",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-f1-forward",
+      "lineId": "fz-f1",
+      "direction": "文岭",
+      "formationId": "fz-f1-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车（非快车）",
+      "sourceIds": [
+        "attachment-202608",
+        "f1-current-service"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-福州火车站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-闽都",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-南公园",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三叉街-滨海快线",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-帝封江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-祥谦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-首占",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-大数据",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-滨海中央商务区",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-机场",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-文岭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    },
+    {
+      "id": "fz-f1-reverse",
+      "lineId": "fz-f1",
+      "direction": "福州火车站",
+      "formationId": "fz-f1-train",
+      "servicePattern": "all-stop",
+      "serviceLabel": "普通列车（非快车）",
+      "sourceIds": [
+        "attachment-202608",
+        "f1-current-service"
+      ],
+      "stops": [
+        {
+          "stationId": "fz-文岭",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-机场",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-滨海中央商务区",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-大数据",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-首占",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-祥谦",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-帝封江",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-三叉街-滨海快线",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-南公园",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-闽都",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-东门",
+          "platformId": null,
+          "minutesFromPrevious": null
+        },
+        {
+          "stationId": "fz-福州火车站",
+          "platformId": null,
+          "minutesFromPrevious": null
+        }
+      ]
+    }
+  ],
+  "walkNodes": [],
+  "walkEdges": [],
+  "externalTransfers": [
+    {
+      "id": "fz-external-sanchajie",
+      "fromStationId": "fz-三叉街",
+      "toStationId": "fz-三叉街-滨海快线",
+      "bidirectional": true,
+      "walkingMetres": null,
+      "minutes": null,
+      "wheelchair": "unknown",
+      "provenance": {
+        "kind": "official",
+        "source": "https://www.fuzhou.gov.cn/zwgk/gzdt/rcyw/202509/t20250918_5079719.htm",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "f1-interchange"
+      ],
+      "note": "需出站经地面重新进站，具体通路及距离未录入，不能视为站内换乘或完整无障碍通路。"
+    },
+    {
+      "id": "fz-external-shuibu-mindu",
+      "fromStationId": "fz-水部",
+      "toStationId": "fz-闽都",
+      "bidirectional": true,
+      "walkingMetres": null,
+      "minutes": null,
+      "wheelchair": "unknown",
+      "provenance": {
+        "kind": "official",
+        "source": "https://www.fuzhou.gov.cn/zwgk/gzdt/rcyw/202509/t20250918_5079719.htm",
+        "recordedAt": "2026-10-16"
+      },
+      "sourceIds": [
+        "f1-interchange"
+      ],
+      "note": "需出站换乘，具体通路及距离未录入，不能视为站内换乘或完整无障碍通路。"
+    }
+  ],
+  "excluded": [
+    {
+      "lineId": "fz-l6",
+      "names": [
+        "莲花",
+        "壶井"
+      ],
+      "reason": "暂缓开放",
+      "sourceIds": [
+        "attachment-202608",
+        "l6-deferred"
+      ]
+    },
+    {
+      "lineId": "fz-f1",
+      "names": [
+        "盖山",
+        "莲花山"
+      ],
+      "reason": "预留",
+      "sourceIds": [
+        "f1-reserves"
+      ]
+    },
+    {
+      "lineId": "fz-f1",
+      "names": [
+        "滨海西"
+      ],
+      "reason": "暂缓开放；道路竣工不等于车站开放",
+      "sourceIds": [
+        "attachment-202608",
+        "f1-interchange",
+        "post-map-road"
+      ]
+    },
+    {
+      "lineId": "fz-l2",
+      "name": "2号线东延线一期",
+      "reason": "建设阶段，未取得载客开通公告",
+      "sourceIds": [
+        "extension-progress",
+        "post-map-extension-progress"
+      ]
+    },
+    {
+      "lineId": "fz-l6",
+      "name": "6号线东调段",
+      "reason": "建设阶段，未取得载客开通公告",
+      "sourceIds": [
+        "extension-progress",
+        "post-map-extension-progress"
+      ]
+    }
+  ]
+}

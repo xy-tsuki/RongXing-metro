@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0",
+  "version": "demo-2026.10.16.1",
+  "city": {
+    "id": "fuzhou-synthetic",
+    "name": "福州 · 合成演示"
+  },
+  "provenance": {
+    "kind": "demo",
+    "source": "手工构建的虚构教学网络；未开展现场测绘；禁止用于真实出行",
+    "recordedAt": "2026-10-16"
+  },
+  "description": "仅借用福州作为产品起点，以下所有站名、线路连接、运行方向、车辆及设施位置均为虚构模拟；不代表福州地铁实际网络。"
+}

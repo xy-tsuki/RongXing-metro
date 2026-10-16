@@ -1,0 +1,11 @@
+{
+  "pages": [{ "path": "pages/index/index", "style": {
+    "navigationBarTitleText": "榕行 · 精细化地铁导航",
+    "navigationBarBackgroundColor": "#f5f6f1", "navigationBarTextStyle": "black",
+    // #ifdef H5
+    "navigationStyle": "custom",
+    // #endif
+    "enablePullDownRefresh": false
+  } }],
+  "globalStyle": { "backgroundColor": "#f5f6f1" }
+}

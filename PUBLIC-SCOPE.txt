@@ -1,0 +1,16 @@
+Rongxing Metro public source scope
+
+Included
+- src/: uni-app Vue 3 application, routing engine, network data and import UI
+- scripts/: data validation, conversion and network maintenance tools
+- tests/: automated core and data-entry tests
+- data-entry/: synthetic examples for trying the local station editor
+- package.json, package-lock.json, index.html and TypeScript/Vite/Vitest config
+
+Excluded from this public repository
+- Markdown documents, research notes and Vibe development records
+- docs/ and output/ (private project documentation and verification artifacts)
+- local npm configuration/cache, dependencies and generated build output
+
+Real station network topology is separated from the synthetic indoor-layout examples.
+Real station-specific facilities, platform geometry, carriage doors and paths remain unverified until entered from survey data.

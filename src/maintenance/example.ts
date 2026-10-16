@@ -1,0 +1,20 @@
+import type { StationPatch } from './station-patch'
+/** Synthetic teaching station only. Never imported by the real-network loader. */
+export const singleStationExample: StationPatch = {
+  format: 'station-entry/1', station: '缺测站',
+  provenance: { kind: 'demo', source: '单站录入教学示例：全部设施和门号均为合成数据，禁止用于真实出行', recordedAt: '2026-10-16' },
+  nodes: [
+    { label: '示例公共站厅', level: -1, kind: 'concourse', knowledge: 'confirmed' },
+    { label: '示例电梯站厅口', level: -1, kind: 'facility', knowledge: 'confirmed' },
+    { label: '示例电梯站台口', level: -2, kind: 'facility', knowledge: 'confirmed' },
+    { label: '演示2号线往缺测站方向 2车1门', line: '演示2号线', direction: '缺测站', level: -2, kind: 'door', car: 2, door: 1, knowledge: 'confirmed' },
+    { label: '演示2号线往缺测站方向 2车2门', line: '演示2号线', direction: '缺测站', level: -2, kind: 'door', car: 2, door: 2, knowledge: 'confirmed' },
+  ],
+  paths: [
+    { from: '示例公共站厅', to: '示例电梯站厅口', kind: 'walk', metres: 8, seconds: 8, stairCount: 0, wheelchair: 'confirmed', bidirectional: true, knowledge: 'confirmed' },
+    { from: '示例电梯站厅口', to: '示例电梯站台口', kind: 'lift', metres: 0, seconds: 35, stairCount: 0, wheelchair: 'confirmed', bidirectional: true, knowledge: 'confirmed' },
+    { from: '示例电梯站台口', to: '演示2号线往缺测站方向 2车1门', kind: 'walk', metres: 6, seconds: 6, stairCount: 0, wheelchair: 'confirmed', bidirectional: true, knowledge: 'confirmed' },
+    { from: '示例电梯站台口', to: '演示2号线往缺测站方向 2车2门', kind: 'walk', metres: 6, seconds: 6, stairCount: 0, wheelchair: 'confirmed', bidirectional: true, knowledge: 'confirmed' },
+  ],
+  manualRecommendations: [{ label: '现场建议对照（教学）', line: '演示2号线', direction: '缺测站', purpose: 'exit', positions: [{ car: 2, door: 1 }, { car: 2, door: 2 }], note: '仅示范对照保存；算法仍需根据上述通路计算。' }],
+}

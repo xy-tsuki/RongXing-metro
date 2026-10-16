@@ -1,0 +1,6 @@
+{
+  "name": "榕行地铁", "appid": "", "description": "精确到车门的地铁出行 · 演示原型",
+  "versionName": "0.1.0", "versionCode": "100", "vueVersion": "3", "uniStatistics": { "enable": false },
+  "h5": { "title": "榕行 · 精细化地铁导航", "router": { "mode": "hash", "base": "./" } },
+  "mp-weixin": { "appid": "touristappid", "setting": { "urlCheck": false, "es6": true, "minified": true }, "usingComponents": true }
+}
