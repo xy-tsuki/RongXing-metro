@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import network from '../src/data/fuzhou-network.json'
-import type { MetroDataset } from '../src/core/types'
+import type { JourneyRoute, MetroDataset } from '../src/core/types'
+import { applyApprovedPositions } from '../src/core/approved-positions'
 import { createCatalog, rowKey } from '../src/maintenance/catalog'
 import { projectApprovedPositions } from '../scripts/maintenance/approved-positions'
 import { planJourney } from '../src/core/planner'
@@ -14,6 +15,24 @@ function fixture() {
   state.rows[rowKey('fz-前屿', 'fz-l2-reverse')].电梯对应车厢车门 = '4:7;3:1'
   return state
 }
+describe('transfer guidance after reviewed positions replace a leg', () => {
+  // 两段行程：换乘只记录「下车门 → 下一程站台」，不得残留被替换前的旧车门
+  const leg = (serviceId: string, toStationId: string, direction: string) => ({ serviceId, lineId: serviceId, lineName: serviceId, lineColor: '#000', direction, fromStationId: 'a', fromStationName: 'a', toStationId, toStationName: toStationId, stopCount: 1, rideMinutes: 2, recommendations: [{ car: 2, door: 3, positionId: 'old' }], recommendationStatus: 'complete' as const, recommendationBasis: [] })
+  const route = (): JourneyRoute => ({ id: 'r', legs: [leg('L1', 'T', '往东'), leg('L2', 'D', '往北')], originPath: null, destinationPath: null, doorCombinations: [], walkingMetres: 100, stairCount: 0, rideMinutes: 4, totalMinutes: 10, transferCount: 1, confidence: 'partial', equalChoicesTruncated: false, granularity: 'detailed',
+    transfers: [{ stationId: 'T', stationName: 'T', fromLineName: 'L1', toLineName: 'L2', path: { nodes: [], edges: [], metres: 50, minutes: 1, stairCount: 0, instructions: ['走楼梯'] }, instructions: ['从2号车厢3号门下车', '走楼梯', '在L2往往北方向，前往2号车厢3号门候车'] }] })
+  const data = (stationId: string, serviceId: string) => ({ provenance: { kind: 'official' }, approvedFacilityPositions: [{ id: 'p', stationId, serviceId, kind: 'lift', positions: [{ car: 4, door: 1 }], reviewRevision: 1 }] }) as unknown as MetroDataset
+  it('drops the old alighting door when the arriving leg is replaced', () => {
+    const t = applyApprovedPositions(data('T', 'L1'), route(), 'shortest').transfers[0]
+    expect(t.path).toBeNull()
+    expect(t.instructions.join()).not.toMatch(/2号车厢/)
+    expect(t.instructions.at(-1)).toContain('按下一程推荐的车门候车')
+  })
+  it('drops the old boarding door when the next leg is replaced', () => {
+    const t = applyApprovedPositions(data('D', 'L2'), route(), 'shortest').transfers[0]
+    expect(t.instructions[0]).toBe('从2号车厢3号门下车')
+    expect(t.instructions.at(-1)).toBe('前往L2往往北方向站台，按下一程推荐的车门候车')
+  })
+})
 describe('reviewed facility positions used in planning', () => {
   it('projects only formal records and recommends the correct direction without invented geometry', () => {
     const state = fixture(), data = projectApprovedPositions(state)

@@ -23,6 +23,15 @@ export function applyApprovedPositions(data: MetroDataset, route: JourneyRoute, 
   if (!changed) return route
   // A newly selected local position is not part of any old optimized all-journey combination.
   return { ...route, legs, doorCombinations: [], destinationPath: legs.at(-1)?.approvedFacilities ? null : route.destinationPath,
-    transfers: route.transfers.map((t, i) => legs[i].approvedFacilities ? { ...t, path: null, instructions: [t.instructions[0], '下车优先采用本方向已审核设施门位，后续按现场换乘指引通行'] } : t),
+    transfers: route.transfers.map((t, i) => {
+      // 换乘只管「下车门 → 下一程站台」；下一程在哪个门候车由下一程自己的推荐决定，不能沿用被替换前的旧车门。
+      const boardLine = `前往${t.toLineName}往${legs[i + 1].direction}方向站台，按下一程推荐的车门候车`
+      const oldBoarding = /号门候车$/.test(t.instructions.at(-1) ?? '')
+      if (legs[i].approvedFacilities) return { ...t, path: null, instructions: t.kind === 'external'
+        ? [t.instructions[0], '下车优先采用本方向已审核设施门位，后续按现场指引出站换乘']
+        : ['按本段推荐的已审核设施门位下车', '下车优先采用本方向已审核设施门位，后续按现场换乘指引通行', boardLine] }
+      if (legs[i + 1].approvedFacilities && oldBoarding) return { ...t, instructions: [...t.instructions.slice(0, -1), boardLine] }
+      return t
+    }),
     walkingMetres: null, stairCount: null, totalMinutes: null, confidence: data.provenance.kind === 'demo' ? 'demo' : 'partial', granularity: 'partial' }
 }
