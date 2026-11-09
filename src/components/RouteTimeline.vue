@@ -1,13 +1,22 @@
 <script setup lang="ts">
+import { transitDisplayText } from '../navigation/line-display'
 import { computed, ref } from 'vue'
-import type { JourneyRoute, MetroDataset } from '../core/types'
-import { arrivalPathFor, compactInstruction, lineInk, positionChoices, recommendationFacilities, transferOverview } from './route-presentation'
+import type { JourneyRoute, MetroDataset, RouteMode } from '../core/types'
+import { arrivalPathFor, compactInstruction, positionChoices, recommendationFacilities, transferOverview } from './route-presentation'
 import RidePosition from './RidePosition.vue'
 import ExternalConnection from './ExternalConnection.vue'
-const props = defineProps<{ route: JourneyRoute; dataset: MetroDataset; combinationIndex: number; explicitSelection?: boolean; demo: boolean; destinationName: string }>()
-const emit = defineEmits<{ openCombinations: [] }>()
-const expanded = ref<string[]>([])
-const toggle = (id: string) => { expanded.value = expanded.value.includes(id) ? expanded.value.filter(x => x !== id) : [...expanded.value, id] }
+import JourneyTime from './JourneyTime.vue'
+import StationTime from './StationTime.vue'
+import ServiceClassBadge from './ServiceClassBadge.vue'
+import TransferTime from './TransferTime.vue'
+import { serviceClassFor } from '../navigation/service-class'
+import type { JourneyTiming } from '../navigation/timing'
+import type { TestTiming } from '../navigation/test-timetable'
+const props = defineProps<{ route: JourneyRoute; dataset: MetroDataset; combinationIndex: number; explicitSelection?: boolean; demo: boolean; destinationName: string; timing?: JourneyTiming; expandedKeys?: string[]; mode?: RouteMode }>()
+const emit = defineEmits<{ openCombinations: []; 'update:expandedKeys': [keys:string[]] }>()
+const localExpanded = ref<string[]>([])
+const expanded = computed(()=>props.expandedKeys??localExpanded.value)
+const toggle = (id: string) => { const keys = expanded.value.includes(id) ? expanded.value.filter(x => x !== id) : [...expanded.value, id]; localExpanded.value=keys; emit('update:expandedKeys',keys) }
 const combination = computed(() => props.route.doorCombinations[props.combinationIndex])
 const origin = computed(() => combination.value?.originPath ?? props.route.originPath)
 const destination = computed(() => combination.value?.destinationPath ?? props.route.destinationPath)
@@ -19,6 +28,8 @@ function formation(index: number) {
   return props.dataset.formations.find(f => f.id === service?.formationId)
 }
 function viaStations(index: number) {
+  const scheduled = (props.timing?.legs?.[index] as TestTiming | undefined)?.stopStationIds
+  if (scheduled) return scheduled.slice(1, -1).map(id => ({ id, name: props.dataset.stations.find(s => s.id === id)?.name ?? id }))
   const leg = props.route.legs[index], service = props.dataset.services.find(s => s.id === leg.serviceId)
   if (!service) return []
   return service.stops.slice(service.stops.findIndex(s => s.stationId === leg.fromStationId) + 1, service.stops.findIndex(s => s.stationId === leg.toStationId))
@@ -27,38 +38,39 @@ function viaStations(index: number) {
 </script>
 <template>
   <view class="timeline" aria-label="逐段乘车与换乘指引">
-    <ExternalConnection v-for="(guide, index) in route.accessTransfers" :key="'access-' + index" :guide="guide"/>
+    <ExternalConnection v-for="(guide, index) in route.accessTransfers" :key="'access-' + index" :guide="guide" :dataset="dataset" :mode="mode"/>
     <view v-for="(leg, index) in route.legs" :key="leg.serviceId + '-' + index" class="timeline-leg">
-      <view v-if="index === 0 || leg.fromStationId !== route.legs[index - 1].toStationId" class="station-event departure">
+      <view class="station-event departure">
+        <StationTime :at="timing?.legs?.[index]?.departureAt" :journey-start="timing?.route?.departureAt" :offset="timing?.legs?.[index]?.utcOffsetMinutes"/>
         <view class="station-dot" :style="{ borderColor: leg.lineColor }"/>
-        <view class="station-row"><text class="station-name">{{ leg.fromStationName }}</text><text class="station-action">{{ index === 0 ? '起点' : '重新进站' }}</text></view>
+        <view class="station-row"><text class="station-name">{{ leg.fromStationName }}</text><text class="station-action">{{ index === 0 ? '起点 · 上车' : '换乘上车' }}</text></view>
       </view>
       <view class="ride-segment">
         <view class="ride-rail" :style="{ backgroundColor: leg.lineColor }"/>
         <view class="ride-header">
-          <text class="route-line" :style="{ backgroundColor: leg.lineColor, color: lineInk(leg.lineColor) }">{{ leg.lineName.replace('演示', '') }}</text>
+          <view class="line-and-direction"><text class="route-line" :style="{ backgroundColor: leg.lineColor, color: '#ffffff' }">{{ transitDisplayText(leg.lineName).replace('演示', '') }}</text><view class="direction-row"><text class="ride-direction">往 <text class="direction-terminal">{{ leg.direction }}</text></text><ServiceClassBadge v-if="leg.lineId === 'fz-f1' || timing?.legs?.[index]?.serviceClass && timing.legs[index].serviceClass !== 'local'" :value="serviceClassFor(dataset.services.find(service => service.id === leg.serviceId), timing?.legs?.[index]?.serviceClass)"/></view></view>
           <button class="stops-button" :aria-label="'第' + (index + 1) + '段途经车站'" :aria-expanded="expanded.includes('stops-' + index)" @tap="toggle('stops-' + index)"><text class="stop-count">{{ leg.stopCount }} 站</text><text>{{ expanded.includes('stops-' + index) ? '−' : '⌄' }}</text></button>
         </view>
-        <text class="ride-direction">往 <text class="direction-terminal">{{ leg.direction }}</text></text>
-        <view v-if="expanded.includes('stops-' + index)" class="via-list"><text v-for="stop in viaStations(index)" :key="stop.id" class="via-name">{{ stop.name }}</text><text v-if="!viaStations(index).length" class="via-name">下一站即下车站</text><text class="via-name">{{ leg.toStationName }} · 下车</text><text v-if="leg.rideMinutes !== null" class="via-name">行车约 {{ Math.ceil(leg.rideMinutes) }} 分钟{{ demo ? '（演示估算）' : '' }}</text></view>
+        <JourneyTime kind="ride" :value="timing?.legs?.[index]" :duration-only="true"/>
+        <view v-if="expanded.includes('stops-' + index)" class="via-list"><text v-for="stop in viaStations(index)" :key="stop.id" class="via-name">{{ stop.name }}</text><text v-if="!viaStations(index).length" class="via-name">下一站即下车站</text><text v-if="leg.rideMinutes !== null" class="via-name">行车约 {{ Math.ceil(leg.rideMinutes) }} 分钟{{ demo ? '（演示估算）' : '' }}</text></view>
         <RidePosition :leg="leg" :formation="formation(index)" :choices="positionChoices(route, index, combinationIndex)" :path="path(index)" :demo="demo" :facilities="recommendationFacilities(route, index)" :linked="!!combination">
           <template v-if="index === 0 && origin"><text class="detail-heading">上车前 · 从付费站厅到站台</text><view v-for="(instruction, i) in origin.instructions" :key="i" class="walk-step"><text class="walk-number">{{ i + 1 }}</text><text class="walk-copy">{{ compactInstruction(instruction, leg.fromStationName) }}</text></view></template>
         </RidePosition>
       </view>
-      <view class="station-event arrival"><view class="station-dot" :style="{ borderColor: leg.lineColor }"/><view class="station-row"><text class="station-name">{{ leg.toStationName }}</text><text class="station-action">{{ index < route.legs.length - 1 ? '换乘' : '终点 · 下车' }}</text></view></view>
+      <view class="station-event arrival"><StationTime :at="timing?.legs?.[index]?.arrivalAt" :journey-start="timing?.route?.departureAt" :offset="timing?.legs?.[index]?.utcOffsetMinutes"/><view class="station-dot" :style="{ borderColor: leg.lineColor }"/><view class="station-row"><text class="station-name">{{ leg.toStationName }}</text><text class="station-action">{{ index < route.legs.length - 1 ? '换乘' : '终点 · 下车' }}</text></view></view>
       <view v-if="route.transfers[index]" class="transfer-segment">
         <view class="walk-rail"/>
-        <view class="transfer-header"><text class="walk-distance">{{ route.transfers[index].kind === 'external' ? '出站步行' : '步行' }} {{ transferPath(index) ? Math.round(transferPath(index)!.metres) + ' 米 · 约 ' + Math.ceil(transferPath(index)!.minutes) + ' 分钟' : '距离与时间待补' }}</text><button class="details-button" :aria-label="'第' + (index + 1) + '次换乘步骤'" :aria-expanded="expanded.includes('transfer-' + index)" @tap="toggle('transfer-' + index)">步骤 {{ expanded.includes('transfer-' + index) ? '−' : '⌄' }}</button></view>
+        <view class="transfer-header"><view class="transfer-measurements"><text class="walk-distance">{{ route.transfers[index].kind === 'external' ? '出站步行' : '步行' }} {{ transferPath(index) ? Math.round(transferPath(index)!.metres) + ' 米' : '距离待补' }}</text><TransferTime :guide="route.transfers[index]" :path="transferPath(index)" :value="timing?.transfers?.[index]" :dataset="dataset" :mode="mode"/></view><button class="details-button" :aria-label="'第' + (index + 1) + '次换乘步骤'" :aria-expanded="expanded.includes('transfer-' + index)" @tap="toggle('transfer-' + index)">步骤 {{ expanded.includes('transfer-' + index) ? '−' : '⌄' }}</button></view>
         <text class="transfer-overview">{{ transferOverview(route.transfers[index], transferPath(index)) }}</text>
         <view v-if="expanded.includes('transfer-' + index)" class="transfer-details">
           <text v-if="combination && route.doorCombinations.length > 1" class="detail-note">{{ explicitSelection ? '当前搭配' : '以下以一组等优搭配为例' }} · 组合 {{ combinationIndex + 1 }}，可在下方切换整程搭配。</text>
           <view v-if="selected(index)" class="walk-step"><text class="walk-number">1</text><text class="walk-copy">从 {{ selected(index)?.car }} 车厢 {{ selected(index)?.door }} 门下车。</text></view>
-          <view v-for="(instruction, i) in (transferPath(index)?.instructions ?? route.transfers[index].instructions)" :key="i" class="walk-step"><text class="walk-number">{{ i + (selected(index) ? 2 : 1) }}</text><text class="walk-copy">{{ route.transfers[index].kind === 'external' ? instruction : compactInstruction(instruction, leg.toStationName) }}</text></view>
+          <view v-for="(instruction, i) in (transferPath(index)?.instructions ?? route.transfers[index].instructions)" :key="i" class="walk-step"><text class="walk-number">{{ i + (selected(index) ? 2 : 1) }}</text><text class="walk-copy">{{ route.transfers[index].kind === 'external' ? transitDisplayText(instruction) : compactInstruction(instruction, leg.toStationName) }}</text></view>
           <text v-if="combination && selected(index + 1)" class="next-boarding">到 {{ selected(index + 1)?.car }} 车厢 {{ selected(index + 1)?.door }} 门，乘坐下一段。</text>
         </view>
       </view>
     </view>
-    <ExternalConnection v-for="(guide, index) in route.egressTransfers" :key="'egress-' + index" :guide="guide"/>
+    <ExternalConnection v-for="(guide, index) in route.egressTransfers" :key="'egress-' + index" :guide="guide" :dataset="dataset" :mode="mode"/>
     <view class="destination-section">
       <view class="destination-header"><text class="destination-note">{{ route.egressTransfers?.length || !route.legs.length ? '抵达 ' + destinationName : '前往付费站厅 · 未指定出口' }}</text><button v-if="destination" class="details-button" aria-label="到达后步行步骤" :aria-expanded="expanded.includes('destination')" @tap="toggle('destination')">步骤 {{ expanded.includes('destination') ? '−' : '⌄' }}</button></view>
       <view v-if="destination && expanded.includes('destination')"><view v-for="(instruction, index) in destination.instructions" :key="index" class="walk-step"><text class="walk-number">{{ index + 1 }}</text><text class="walk-copy">{{ compactInstruction(instruction, destinationName) }}</text></view></view>
@@ -79,7 +91,9 @@ function viaStations(index: number) {
 .ride-segment { position: relative; padding: 0 0 8px 36px; }
 .ride-rail { position: absolute; left: 9px; width: 7px; top: -23px; bottom: -27px; }
 .ride-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; }
-.route-line { max-width: calc(100% - 65px); padding: 2px 7px; border-radius: 3px; font-size: 17px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.line-and-direction { flex:1;min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:5px 10px; }
+.direction-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 7px; min-width: 0; max-width: 100%; }.ride-direction { overflow-wrap: anywhere; }
+.route-line { padding: 2px 7px; border-radius: 3px; font-size: 17px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; max-width:100%; }
 .stops-button { min-height: 44px; min-width: 58px; display: flex; align-items: center; justify-content: flex-end; gap: 7px; font-size: 14px; color: #66756c; background: transparent; margin: 0; padding: 6px 0; line-height: 1.5; border-radius: 0; }
 .stop-count { font-weight: 650; color: #445b4c; }.ride-direction { display: block; font-size: 16px; line-height: 1.65; color: #465b4f; }.direction-terminal { font-weight: 600; }
 .stops-button::after,.details-button::after,.combination-link::after { border: none; }
@@ -87,6 +101,7 @@ function viaStations(index: number) {
 .transfer-segment { position: relative; padding: 0 0 16px 36px; }
 .walk-rail { position: absolute; top: -15px; bottom: -16px; left: 11px; border-left: 3px dotted #a9b4ad; }
 .transfer-header,.destination-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.transfer-header { align-items: flex-start; }.transfer-measurements { min-width: 0; flex: 1; }
 .walk-distance { font-size: 14px; line-height: 1.6; font-weight: 650; color: #4f6556; }
 .details-button { min-height: 44px; min-width: 56px; margin: 0; padding: 7px 0 7px 8px; background: transparent; border-radius: 0; font-size: 13px; color: #68766e; line-height: 1.6; display: flex; align-items: center; justify-content: flex-end; flex-shrink: 0; }
 .transfer-overview { display: block; font-size: 14px; color: #5b6c60; line-height: 1.65; overflow-wrap: anywhere; }
@@ -95,5 +110,8 @@ function viaStations(index: number) {
 .walk-step { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }.walk-number { flex-shrink: 0; min-width: 15px; font-size: 12px; color: #78877a; }.walk-copy { flex: 1; min-width: 0; font-size: 14px; color: #4b6151; line-height: 1.75; overflow-wrap: anywhere; }.next-boarding { display: block; font-size: 14px; color: #345b41; font-weight: 600; line-height: 1.7; margin-top: 10px; }
 .destination-section { padding: 0 0 10px 36px; }.destination-note { font-size: 14px; color: #647469; line-height: 1.65; overflow-wrap: anywhere; }
 .combination-link { width: 100%; min-height: 48px; margin: 5px 0 0; padding: 10px 0; border-radius: 0; border-top: 1px solid #e8ece9; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; text-align: left; font-size: 13px; color: #42664f; line-height: 1.6; background: transparent; }
-@media (max-width: 359px) { .station-event,.ride-segment,.transfer-segment,.destination-section { padding-left: 31px; }.station-name { font-size: 20px; }.route-line { font-size: 16px; } }
+/* Reserve a clock gutter at every boarding/alighting node, including repeated transfer stations. */
+.station-event,.ride-segment,.transfer-segment,.destination-section{padding-left:86px}
+.station-dot{left:53px}.arrival .station-dot{left:55px}.ride-rail{left:59px}.walk-rail{left:61px}
+@media (max-width: 359px) { .station-name { font-size: 20px; }.route-line { font-size: 16px; }.ride-header{align-items:flex-start}.stops-button{min-width:47px;gap:3px} }
 </style>

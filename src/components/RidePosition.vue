@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { transitDisplayText } from '../navigation/line-display'
 import { computed, ref } from 'vue'
 import type { Formation, JourneyLeg, WalkPath } from '../core/types'
 import type { FacilityKind, PositionChoice } from './route-presentation'
@@ -16,16 +17,16 @@ const groups = computed(() => groupEquivalentPositions(props.choices))
     </view>
     <text v-else class="position-pending">车厢、车门待补充</text>
     <view class="position-meta">
-      <view class="facility-list"><FacilityLabel v-for="kind in facilities" :key="kind" :kind="kind"/><text v-if="!facilities.length" class="meta-note">{{ path ? '平层通路' : '门位与设施待核实' }}</text><text v-if="leg.recommendationStatus === 'local'" class="local-label">局部建议</text></view>
-      <button class="disclosure" :aria-label="leg.lineName + '乘车位置依据'" :aria-expanded="details" @tap="details = !details">依据 <text>{{ details ? '−' : '⌄' }}</text></button>
+      <view class="facility-list"><FacilityLabel v-for="kind in facilities" :key="kind" :kind="kind"/><text v-if="!facilities.length" class="meta-note">{{ path ? '平层通路' : '门位与设施待核实' }}</text><text v-if="leg.recommendationStatus === 'local'" class="local-label">{{ leg.approvedFacilities?.length ? '已审核门位' : '局部建议' }}</text></view>
+      <button class="disclosure" :aria-label="transitDisplayText(leg.lineName) + '乘车位置依据'" :aria-expanded="details" @tap="details = !details">依据 <text>{{ details ? '−' : '⌄' }}</text></button>
     </view>
     <view v-if="details" class="position-details">
       <text v-if="choices.length > 1" class="detail-text">所列门号同等推荐，仅在已录入通路内比较。</text>
       <text v-if="demo" class="detail-text">合成演示建议，不用于真实乘车。</text>
-      <text v-for="(basis, index) in leg.recommendationBasis" :key="index" class="detail-text">{{ basis }}</text>
+      <text v-for="(basis, index) in leg.recommendationBasis" :key="index" class="detail-text">{{ transitDisplayText(basis) }}</text>
       <text v-if="path" class="detail-text">一组相容搭配对应通路：步行 {{ Math.round(path.metres) }} 米，{{ path.stairCount ? path.stairCount + ' 级普通楼梯' : '无普通楼梯' }}。不同乘车段请按同一整程搭配使用。</text>
-      <text v-else class="detail-text">设施位置、连接楼层与通行方向待采集。</text>
-      <template v-if="!linked && path"><text class="detail-text">首个局部位置对应的已录入通路：</text><text v-for="(instruction, index) in path.instructions" :key="index" class="detail-text">{{ index + 1 }}. {{ instruction }}</text></template>
+      <text v-else class="detail-text">{{ leg.approvedFacilities?.length ? '门位已审核；连接楼层与完整通路尚待补充。' : '设施位置、连接楼层与通行方向待采集。' }}</text>
+      <template v-if="!linked && path"><text class="detail-text">首个局部位置对应的已录入通路：</text><text v-for="(instruction, index) in path.instructions" :key="index" class="detail-text">{{ index + 1 }}. {{ transitDisplayText(instruction) }}</text></template>
       <view v-if="formation" class="formation"><text v-for="car in formation.cars" :key="car" class="formation-car">{{ car }}车</text></view>
       <text class="detail-text">{{ formation?.cars ?? leg.formationCars ?? '未知' }} 节编组，不表示行进方向。{{ formation?.numberingStatus === 'unknown' || !formation?.positions.length ? '门数和编号待核实。' : '编号以现场标识为准。' }}</text>
       <slot/>
