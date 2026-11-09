@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import type { TransferGuide } from '../core/types'
-defineProps<{ guide: TransferGuide }>()
+import { transitDisplayText } from '../navigation/line-display'
+import type { MetroDataset, RouteMode, TransferGuide } from '../core/types'
+import TransferTime from './TransferTime.vue'
+defineProps<{ guide: TransferGuide; dataset?: MetroDataset; mode?: RouteMode }>()
 </script>
 <template>
-  <view class="external-connection"><text class="external-title">出站步行衔接 · {{ guide.stationName }}</text><text v-for="(step, i) in guide.instructions" :key="i" class="external-step">{{ step }}</text><text class="external-note">具体出入口、步行距离及连续无障碍通路待核实。</text></view>
+  <view class="external-connection"><text class="external-title">出站步行衔接 · {{ guide.stationName }}</text><TransferTime :guide="guide" :path="guide.path" :dataset="dataset" :mode="mode"/><text v-for="(step, i) in guide.instructions" :key="i" class="external-step">{{ transitDisplayText(step) }}</text><text class="external-note">具体出入口、步行距离及连续无障碍通路待核实。</text></view>
 </template>
 <style scoped>
 .external-connection { margin: 16px; padding: 15px; background: #f6f2e7; border: 1px solid #d9cba8; border-radius: 10px; color: #66512a; overflow-wrap: anywhere; }

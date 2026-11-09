@@ -1,3 +1,4 @@
+import { applyApprovedPositions } from './approved-positions'
 import type { DoorCombination, DoorPosition, ExternalTransfer, JourneyLeg, JourneyRoute, MetroDataset, PlanRequest, PlanResult, RouteMode, Service, WalkEdge, WalkPath } from './types'
 import { validateDataset } from './validation'
 
@@ -372,7 +373,7 @@ function attachEndpointConnections(data: MetroDataset, route: JourneyRoute, acce
 }
 
 /** Adds explicit station-to-station access/egress links without inventing an indoor map. */
-export function planJourney(data: MetroDataset, request: PlanRequest): PlanResult {
+function planWithEndpoints(data: MetroDataset, request: PlanRequest): PlanResult {
   const base = planCoreJourney(data, request)
   if (base.status === 'invalid' || !(data.externalTransfers?.length)) return base
   const usable = (link: ExternalTransfer) => request.mode !== 'elevator' || link.wheelchair !== 'blocked'
@@ -404,4 +405,9 @@ export function planJourney(data: MetroDataset, request: PlanRequest): PlanResul
   const stopCount = (r: JourneyRoute) => r.legs.reduce((n, leg) => n + leg.stopCount, 0)
   routes.sort((a, b) => compare([a.transferCount, outsideCount(a), stopCount(a)], [b.transferCount, outsideCount(b), stopCount(b)]))
   return { status: request.mode === 'elevator' || base.status === 'incomplete' ? 'incomplete' : 'ok', routes: routes.filter(r => r.transferCount <= routes[0].transferCount + 1).slice(0, 6), diagnostics: [...base.diagnostics, boundaryMessage] }
+}
+
+export function planJourney(data: MetroDataset, request: PlanRequest): PlanResult {
+  const result = planWithEndpoints(data, request)
+  return { ...result, routes: result.routes.map(route => applyApprovedPositions(data, route, request.mode)) }
 }

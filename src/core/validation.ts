@@ -63,6 +63,17 @@ function validateStructure(input: unknown): string[] {
     if (a && b && a.level !== b.level && e.kind === 'walk') errors.push(`通行边 ${e.id} 跨楼层不能标记为平路`)
     if ((e.kind === 'stairs') !== (e.stairCount > 0)) errors.push(`通行边 ${e.id} 楼梯数量不一致`)
   }
+  if (d.approvedFacilityPositions !== undefined) {
+    if (!Array.isArray(d.approvedFacilityPositions)) errors.push('approvedFacilityPositions必须是数组')
+    else {
+      const ids = new Set<string>()
+      for (const item of d.approvedFacilityPositions) {
+        const service = d.services.find(s => s.id === item.serviceId), formation = formations.get(service?.formationId ?? '')
+        if (!text(item.id) || ids.has(item.id) || !service?.stops.some(s => s.stationId === item.stationId) || !['stairs','escalator','lift'].includes(item.kind) || !Number.isInteger(item.reviewRevision) || item.reviewRevision < 0 || !Array.isArray(item.positions) || !item.positions.length || item.positions.some(p => !Number.isInteger(p.car) || p.car < 1 || p.car > (formation?.cars ?? 0) || !Number.isInteger(p.door) || p.door < 1) || new Set(item.positions.map(p => `${p.car}:${p.door}`)).size !== item.positions.length) errors.push(`已审核设施门位 ${item.id} 无效`)
+        ids.add(item.id)
+      }
+    }
+  }
   if (d.manualRecommendations !== undefined) {
     if (!Array.isArray(d.manualRecommendations)) errors.push('manualRecommendations必须是数组')
     else for (const item of d.manualRecommendations) {

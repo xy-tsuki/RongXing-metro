@@ -1,3 +1,4 @@
+import { transitDisplayText } from '../navigation/line-display'
 import type { DoorRecommendation, JourneyRoute, TransferGuide, WalkEdge, WalkPath } from '../core/types'
 
 export type FacilityKind = Exclude<WalkEdge['kind'], 'walk'>
@@ -7,7 +8,7 @@ export const facilitiesIn = (path?: WalkPath | null): FacilityKind[] =>
 
 /** The station heading already supplies this context; retain floors, facilities and measurements. */
 export const compactInstruction = (instruction: string, stationName: string): string =>
-  instruction.split(stationName).join('').replace('（出口未指定）', '')
+  transitDisplayText(instruction).split(stationName).join('').replace('（出口未指定）', '')
 
 export interface PositionChoice { position: DoorRecommendation; combinationIndex: number | null }
 
@@ -21,13 +22,14 @@ export function groupEquivalentPositions(choices: PositionChoice[]): { car: numb
 }
 
 export function transferOverview(guide: TransferGuide, path?: WalkPath | null): string {
-  if (guide.kind === 'external') return guide.instructions[0] ?? '出站换乘，具体通路待核实'
-  if (!path) return `前往${guide.toLineName.replace('演示', '')}，具体换乘通路待核实`
+  if (guide.kind === 'external') return transitDisplayText(guide.instructions[0] ?? '出站换乘，具体通路待核实')
+  if (!path) return `前往${transitDisplayText(guide.toLineName).replace('演示', '')}，具体换乘通路待核实`
   const names = facilitiesIn(path).map(kind => facilityNames[kind]).join('、')
-  return `${names ? '经' + names : '沿平层通道'}前往${guide.toLineName.replace('演示', '')}站台`
+  return `${names ? '经' + names : '沿平层通道'}前往${transitDisplayText(guide.toLineName).replace('演示', '')}站台`
 }
 
 export function recommendationFacilities(route: JourneyRoute, index: number): FacilityKind[] {
+  if (route.legs[index]?.approvedFacilities?.length) return route.legs[index].approvedFacilities!
   const paths = route.doorCombinations.length
     ? route.doorCombinations.map((_, ci) => arrivalPathFor(route, index, ci))
     : [arrivalPathFor(route, index, 0)]
@@ -55,9 +57,6 @@ export function arrivalPathFor(route: JourneyRoute, legIndex: number, selectedCo
     (legIndex === route.legs.length - 1 ? route.destinationPath : null)
 }
 
-export function lineInk(hex: string): string {
-  const channels = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
-    .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
-  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
-  return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05 ? '#ffffff' : '#000000'
+export function lineInk(_hex: string): string {
+  return '#ffffff'
 }

@@ -1,11 +1,19 @@
 {
   "pages": [{ "path": "pages/index/index", "style": {
-    "navigationBarTitleText": "榕行 · 精细化地铁导航",
+    "navigationBarTitleText": "榕乘 · 精细化地铁导航",
     "navigationBarBackgroundColor": "#ffffff", "navigationBarTextStyle": "black",
-    // #ifdef H5
+    // #ifdef H5 || MP-WEIXIN
     "navigationStyle": "custom",
     // #endif
     "enablePullDownRefresh": false
-  } }],
-  "globalStyle": { "backgroundColor": "#ffffff" }
+  } }, { "path": "pages/maintenance/index", "style": { "navigationBarTitleText": "榕乘 · 协作采集", "enablePullDownRefresh": false } }, { "path": "pages/routes/index", "style": { "navigationBarTitleText": "路线方案",
+// #ifdef H5 || MP-WEIXIN
+"navigationStyle": "custom",
+// #endif
+"enablePullDownRefresh":false } }, { "path": "pages/journey/index", "style": { "navigationBarTitleText": "精细导航",
+// #ifdef H5 || MP-WEIXIN
+"navigationStyle": "custom",
+// #endif
+"enablePullDownRefresh":false } }, { "path": "pages/timetable/index", "style": { "navigationBarTitleText": "全天时刻表", "enablePullDownRefresh": false } }],
+  "globalStyle": { "backgroundColor": "#ffffff", "navigationBarBackgroundColor": "#ffffff", "navigationBarTextStyle": "black" }
 }

@@ -9,6 +9,9 @@
 !/tsconfig.json
 !/vite.config.ts
 !/vitest.config.ts
+!/.github/
+!/.github/workflows/
+!/.github/workflows/ci.yml
 !/src/
 !/scripts/
 !/tests/
@@ -34,3 +37,23 @@
 data-entry/*.inspect.ndjson
 *.local
 .DS_Store
+
+# 公开的协作文档白名单（2026-11-09 用户确认）；其余 Markdown 和 docs/ 仍私有
+!/AGENTS.md
+!/CLAUDE.md
+!/.github/pull_request_template.md
+!/docs/
+/docs/*
+!/docs/devlog.md
+# 面向用户的更新说明（2026-11-10 用户确认公开）
+!/CHANGELOG.md
+
+# 本机专用、不公开（2026-11-09 用户确认）：时刻表研究、部署脚本及依赖它们的 Python 测试、字节码
+/scripts/timetable_research/
+/scripts/deployment/
+/tests/test_timetable_*.py
+/tests/test_l1_*.py
+/tests/test_metroman_inventory.py
+/tests/test_alpha_hosting.py
+/tests/test_maintenance_gateway.py
+__pycache__/

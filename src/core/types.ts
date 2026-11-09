@@ -24,7 +24,13 @@ export interface MetroDataset {
   services: Service[]; walkNodes: WalkNode[]; walkEdges: WalkEdge[];
   metadata?: Record<string, unknown>;
   externalTransfers?: ExternalTransfer[];
+  approvedFacilityPositions?: ApprovedFacilityPosition[];
   manualRecommendations?: { id: string; stationId: string; serviceId: string; purpose: 'transfer' | 'exit'; targetServiceId?: string; positions: { car: number; door: number }[]; note: string; provenance: Provenance }[]
+}
+/** Reviewed position facts, independent of surveyed walking geometry. */
+export interface ApprovedFacilityPosition {
+  id: string; stationId: string; serviceId: string; kind: 'stairs' | 'escalator' | 'lift';
+  positions: { car: number; door: number }[]; reviewRevision: number
 }
 export interface ExternalTransfer { id: string; fromStationId: string; toStationId: string; bidirectional: boolean; walkingMetres: number | null; minutes: number | null; wheelchair: 'confirmed' | 'blocked' | 'unknown'; provenance: Provenance }
 export interface WalkPath { nodes: string[]; edges: WalkEdge[]; metres: number; minutes: number; stairCount: number; instructions: string[] }
@@ -34,7 +40,8 @@ export interface JourneyLeg {
   fromStationId: string; fromStationName: string; toStationId: string; toStationName: string;
   stopCount: number; rideMinutes: number | null; recommendations: DoorRecommendation[];
   recommendationStatus: 'pending' | 'local' | 'complete'; recommendationBasis: string[];
-  arrivalPath?: WalkPath | null; boardingRecommendations?: DoorRecommendation[]; formationCars?: number
+  arrivalPath?: WalkPath | null; boardingRecommendations?: DoorRecommendation[]; formationCars?: number;
+  approvedFacilities?: ('stairs' | 'escalator' | 'lift')[]
 }
 export interface TransferGuide { stationId: string; stationName: string; fromLineName: string; toLineName: string; path: WalkPath | null; instructions: string[]; kind?: 'in-station' | 'external'; fromStationId?: string; toStationId?: string }
 export interface DoorCombination { positions: DoorRecommendation[]; originPath: WalkPath; transferPaths: WalkPath[]; destinationPath: WalkPath }

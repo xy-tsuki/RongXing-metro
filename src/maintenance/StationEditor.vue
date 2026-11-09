@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { transitDisplayText } from '../navigation/line-display'
 import { computed, nextTick, ref, watch } from 'vue'
 import type { MetroDataset } from '../core/types'
 import { emptyStationPatch, mergeStationPatch, parsePositions, parseStationCsv, stationPatchToCsv, stationServices } from './station-patch'
@@ -97,7 +98,7 @@ async function loadExample() {
     <view class="form-card">
       <text class="card-title">1 · 选择车站与方向</text>
       <text class="field-label">车站（切换会清空未合并草稿，请先复制备份）</text><picker :range="dataset.stations.map(s => s.name)" :value="stationIndex" @change="stationIndex = choose($event)"><view class="select-value">{{ stationName }} ▾</view></picker>
-      <text class="field-label">线路</text><picker :range="lines.map(l => l.name)" :value="lineIndex" @change="lineIndex = choose($event)"><view class="select-value">{{ lineName }} ▾</view></picker>
+      <text class="field-label">线路</text><picker :range="lines.map(l => transitDisplayText(l.name))" :value="lineIndex" @change="lineIndex = choose($event)"><view class="select-value">{{ transitDisplayText(lineName) }} ▾</view></picker>
       <text class="field-label">运行方向 / 站台</text><picker :range="directions.map(s => '往' + s.direction)" :value="directionIndex" @change="directionIndex = choose($event)"><view class="select-value">往{{ directionName }} ▾</view></picker>
       <text class="field-label">来源类型</text><picker :range="sourceTypes" :value="sourceIndex" @change="patch.provenance.kind = sourceKinds[choose($event)]"><view class="select-value">{{ sourceTypes[sourceIndex] }} ▾</view></picker>
       <text class="field-label">资料来源 / 核实人（必填）</text><input v-model="patch.provenance.source" class="text-field" placeholder="如：本人现场测量，记录本第 3 页" />
@@ -109,7 +110,7 @@ async function loadExample() {
       <text class="field-label">节点类别</text><picker :range="nodeTypes" :value="nodeType" @change="nodeType = choose($event)"><view class="select-value">{{ nodeTypes[nodeType] }} ▾</view></picker>
       <text class="field-label">简短名称（同站内唯一，同名再次录入会更新）</text><input v-model="nodeLabel" class="text-field" placeholder="如：北侧电梯站台口" />
       <text class="field-label">楼层（地面 0，地下 B1 填 -1，B2 填 -2）</text><input v-model="level" class="text-field" type="text" placeholder="填写楼层" />
-      <view v-if="nodeType === 2"><text class="field-label">已核实的车厢号</text><input v-model="car" class="text-field" type="number" placeholder="按本方向现场编号填写" /><text class="field-label">已核实的车门号</text><input v-model="door" class="text-field" type="number" placeholder="不推定每节车厢门数" /><text class="field-help">该门归属于 {{ lineName }} 往{{ directionName }}。尚未确认编号时不要填写门节点，可先录设施与通路。</text></view>
+      <view v-if="nodeType === 2"><text class="field-label">已核实的车厢号</text><input v-model="car" class="text-field" type="number" placeholder="按本方向现场编号填写" /><text class="field-label">已核实的车门号</text><input v-model="door" class="text-field" type="number" placeholder="不推定每节车厢门数" /><text class="field-help">该门归属于 {{ transitDisplayText(lineName) }} 往{{ directionName }}。尚未确认编号时不要填写门节点，可先录设施与通路。</text></view>
       <view class="switch-row"><text>位置尚未确认（不参与推荐）</text><switch :checked="nodeUnknown" @change="nodeUnknown = checked($event)" /></view>
       <button class="action-button" @click="addNode">加入节点草稿</button>
     </view>
@@ -130,7 +131,7 @@ async function loadExample() {
       <text class="card-title">人工核实推荐 · 仅供对照</text><text class="field-help">保存现场建议，方便对照算法。不会直接附加到路线，也不能代替设施和通路录入。</text>
       <text class="field-label">对照名称</text><input v-model="manualName" class="text-field" placeholder="如：北侧换乘口核实记录" />
       <text class="field-label">用途</text><picker :range="['出站 / 离开站台','换乘']" :value="manualPurpose" @change="manualPurpose = choose($event)"><view class="select-value">{{ manualPurpose ? '换乘' : '出站 / 离开站台' }} ▾</view></picker>
-      <view v-if="manualPurpose"><text class="field-label">换乘目标方向</text><picker :range="targetOptions" :value="targetIndex" @change="targetIndex = choose($event)"><view class="select-value">{{ targetOptions[targetIndex] }} ▾</view></picker></view>
+      <view v-if="manualPurpose"><text class="field-label">换乘目标方向</text><picker :range="targetOptions.map(transitDisplayText)" :value="targetIndex" @change="targetIndex = choose($event)"><view class="select-value">{{ transitDisplayText(targetOptions[targetIndex] ?? '') }} ▾</view></picker></view>
       <text class="field-label">等价位置（车厢:车门，多组用分号分隔）</text><input v-model="manualPositions" class="text-field" placeholder="格式示例 2:1;2:2，须填现场核实值" />
       <text class="field-label">核实说明</text><textarea v-model="manualNote" class="text-area" placeholder="记录依据及与算法不同的原因" />
       <button class="action-button" @click="addManual">加入对照草稿</button>
