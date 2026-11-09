@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "city": "fuzhou",
+  "unit": "km",
+  "distanceSource": {
+    "url": "https://zh.wikipedia.org/wiki/%E7%A6%8F%E5%B7%9E%E5%9C%B0%E9%93%81%E8%BD%A6%E7%AB%99%E5%88%97%E8%A1%A8",
+    "pageRevisionDate": "2026-10-05",
+    "retrievedAt": "2026-10-26",
+    "method": "Each array aligns with the operating stop order in src/data/fuzhou-network.json; values are cumulative mileage. Intermediate non-operating stations omitted from the app stop list are included in the cumulative segment distance when trains pass them. Binhai Express values are published to 0.1 km and therefore approximate."
+  },
+  "lines": {
+    "fz-l1": [0, 1.336, 2.434, 3.957, 5.166, 6.015, 7.303, 8.416, 9.431, 10.417, 11.959, 13.803, 14.837, 16.288, 17.543, 18.443, 19.56, 20.457, 21.529, 22.983, 24.053, 25.475, 26.999, 28.248, 29.067],
+    "fz-l2": [0, 2.057, 3.803, 5.411, 6.42, 8.405, 9.261, 12.093, 12.838, 14.08, 14.947, 17.023, 17.89, 19.275, 20.133, 21.229, 22.523, 23.928, 24.935, 26.339, 28.379, 29.563],
+    "fz-l4": [0, 0.942, 2.398, 3.783, 4.967, 6.082, 6.802, 7.725, 8.53, 9.365, 10.491, 11.686, 13.376, 14.341, 15.383, 16.31, 17.398, 19.185, 20.955, 22.613, 24.961, 26.213, 27.588],
+    "fz-l5": [0, 3.214, 4.614, 5.513, 7.161, 8.218, 9.327, 10.12, 11.191, 12.45, 13.455, 14.851, 16.698, 17.939, 19.095, 19.932, 21.515, 22.679, 23.646, 27.142],
+    "fz-l6": [0, 1.017, 3.674, 6.692, 7.939, 14.746, 16.592, 18.134, 19.343, 21.15, 22.715, 24.119, 28.324, 30.742],
+    "fz-f1": [0, 2.6, 3.9, 5.2, 8.3, 14.0, 23.4, 33.3, 45.7, 47.3, 56.4, 62.0]
+  }
+}
