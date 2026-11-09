@@ -1,5 +1,5 @@
 /** Shared contract for the independently developed feedback UI. No automatic telemetry. */
-export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '0.1.0-alpha.1-dev'
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '0.2.0-dev'
 export const BUILD_ID = import.meta.env.VITE_BUILD_ID || 'local-dev'
 export type FeedbackCategory = 'bug' | 'data' | 'suggestion' | 'other'
 export interface FeedbackInput {
