@@ -34,3 +34,11 @@
 data-entry/*.inspect.ndjson
 *.local
 .DS_Store
+
+# 公开的协作文档白名单（2026-11-09 用户确认）；其余 Markdown 和 docs/ 仍私有
+!/AGENTS.md
+!/CLAUDE.md
+!/.github/pull_request_template.md
+!/docs/
+/docs/*
+!/docs/devlog.md
