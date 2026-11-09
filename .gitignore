@@ -45,6 +45,8 @@ data-entry/*.inspect.ndjson
 !/docs/
 /docs/*
 !/docs/devlog.md
+# 面向用户的更新说明（2026-11-10 用户确认公开）
+!/CHANGELOG.md
 
 # 本机专用、不公开（2026-11-09 用户确认）：时刻表研究、部署脚本及依赖它们的 Python 测试、字节码
 /scripts/timetable_research/

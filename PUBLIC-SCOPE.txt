@@ -6,6 +6,7 @@ Included
 - tests/: automated core and data-entry tests
 - data-entry/: editable Fuzhou station maintenance workbook and synthetic editor examples
 - AGENTS.md, CLAUDE.md, .github/pull_request_template.md and docs/devlog.md: public collaboration notes (no server, credential or deployment details)
+- CHANGELOG.md: user-facing release notes
 - package.json, package-lock.json, index.html and TypeScript/Vite/Vitest config
 - .github/workflows/ci.yml: public read-only automated checks; no deployment secrets or deployment job
 
