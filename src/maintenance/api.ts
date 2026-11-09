@@ -1,6 +1,9 @@
-// Mini-program requests require an absolute HTTPS URL; H5 uses its existing origin.
-const base = import.meta.env.DEV && import.meta.env.VITE_PRIVATE_ADMIN === '1' ? '' : (import.meta.env.VITE_MAINTENANCE_API as string | undefined) ?? (import.meta.env.UNI_PLATFORM === 'mp-weixin' ? 'https://metro.xy-tsuki.top' : '')
+// 小程序请求必须用绝对 HTTPS 地址，H5 沿用当前页面来源。
+// 服务地址不写进公开源码：小程序构建从本机被忽略的 .env.local 读取 VITE_PUBLIC_API_ORIGIN。
+const miniProgram = import.meta.env.UNI_PLATFORM === 'mp-weixin'
+const base = import.meta.env.DEV && import.meta.env.VITE_PRIVATE_ADMIN === '1' ? '' : (import.meta.env.VITE_MAINTENANCE_API as string | undefined) ?? (miniProgram ? (import.meta.env.VITE_PUBLIC_API_ORIGIN as string | undefined) ?? '' : '')
 export function maintenanceRequest<T>(path: string, method: 'GET' | 'POST' = 'GET', data?: unknown, token = '', binary = false): Promise<T> {
+  if (miniProgram && !base) return Promise.reject(new Error('未配置服务地址（VITE_PUBLIC_API_ORIGIN），无法联网'))
   return new Promise((resolve, reject) => uni.request({
     url: `${base}${path}`, method, data: data as any,
     header: { 'Content-Type': data instanceof ArrayBuffer ? 'application/octet-stream' : 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },

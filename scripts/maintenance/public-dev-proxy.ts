@@ -2,7 +2,8 @@ import { request as httpRequest, type IncomingMessage, type ServerResponse } fro
 import { request as httpsRequest } from 'node:https'
 
 /** Ordinary local preview uses the existing public service, without admin credentials. */
-export function publicDevProxy(upstream = 'https://metro.xy-tsuki.top') {
+// 上游地址由调用方从本机 .env.local 传入，公开源码不写服务地址。
+export function publicDevProxy(upstream: string) {
   const target = new URL(upstream)
   return (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     if (!req.url?.startsWith('/api/')) { next(); return }

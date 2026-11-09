@@ -100,6 +100,7 @@ npm run build:mp-weixin
 - 数据校验：`npm run data:validate`（通过）；`npm run data:validate -- src/data/demo-network.json`；`npm run network:check`（通过）；`npm run fare:check`（通过）。
 - 会改写数据的命令，不作为常规检查：`network:generate`、`data:generate`、`fare:generate`、`data:import`、`station:import`。
 - 维护服务：`npm run maintenance:serve`、`maintenance:test`、`timetable:import`（依赖本机私有环境，细节见私有文档）。
+- 服务地址：不写进公开源码。在项目根目录建 `.env.local`（已忽略），写 `VITE_PUBLIC_API_ORIGIN=<服务来源地址>`；微信小程序构建用它发请求，`dev:h5` 用它代理 `/api/`。未配置时小程序不联网、使用随包数据，H5 本机预览不代理 `/api/`。可选 `VITE_MAINTENANCE_API` 强制所有平台使用指定的维护接口地址。
 
 ## 架构要点
 
