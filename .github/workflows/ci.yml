@@ -1,0 +1,39 @@
+name: Alpha checks
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - name: Complete suite (SQLite tests must execute)
+        run: |
+          mkdir -p output/ci
+          node node_modules/vitest/vitest.mjs run --reporter=json --outputFile=output/ci/tests.json
+          node -e "const r=require('./output/ci/tests.json'); if(r.numFailedTests || r.numPendingTests || r.numTodoTests || !r.numPassedTests) process.exit(1)"
+      - run: npm run typecheck
+      - run: npm run data:validate
+      - run: npm run data:validate -- src/data/demo-network.json
+      - run: npm run network:check
+      - run: npm run build:h5
+      - run: npm run build:mp-weixin

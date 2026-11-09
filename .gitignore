@@ -9,6 +9,9 @@
 !/tsconfig.json
 !/vite.config.ts
 !/vitest.config.ts
+!/.github/
+!/.github/workflows/
+!/.github/workflows/ci.yml
 !/src/
 !/scripts/
 !/tests/

@@ -7,12 +7,14 @@ Included
 - data-entry/: editable Fuzhou station maintenance workbook and synthetic editor examples
 - AGENTS.md, CLAUDE.md, .github/pull_request_template.md and docs/devlog.md: public collaboration notes (no server, credential or deployment details)
 - package.json, package-lock.json, index.html and TypeScript/Vite/Vitest config
+- .github/workflows/ci.yml: public read-only automated checks; no deployment secrets or deployment job
 
 Excluded from this public repository
 - Other Markdown documents, research notes and Vibe development records
 - docs/ (except docs/devlog.md) and output/ (private project documentation and verification artifacts)
 - local npm configuration/cache, dependencies and generated build output
 - scripts/timetable_research/, scripts/deployment/ and the Python tests that import them (local timetable research and server deployment)
+- README and other GitHub workflow files until separately reviewed and authorized
 
 Real station network topology is separated from the synthetic indoor-layout examples.
 Real station-specific facilities, platform geometry, carriage doors and paths remain unverified until entered from survey data.
