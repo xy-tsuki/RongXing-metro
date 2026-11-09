@@ -12,6 +12,7 @@ Excluded from this public repository
 - Other Markdown documents, research notes and Vibe development records
 - docs/ (except docs/devlog.md) and output/ (private project documentation and verification artifacts)
 - local npm configuration/cache, dependencies and generated build output
+- scripts/timetable_research/, scripts/deployment/ and the Python tests that import them (local timetable research and server deployment)
 
 Real station network topology is separated from the synthetic indoor-layout examples.
 Real station-specific facilities, platform geometry, carriage doors and paths remain unverified until entered from survey data.

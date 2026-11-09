@@ -42,3 +42,13 @@ data-entry/*.inspect.ndjson
 !/docs/
 /docs/*
 !/docs/devlog.md
+
+# 本机专用、不公开（2026-11-09 用户确认）：时刻表研究、部署脚本及依赖它们的 Python 测试、字节码
+/scripts/timetable_research/
+/scripts/deployment/
+/tests/test_timetable_*.py
+/tests/test_l1_*.py
+/tests/test_metroman_inventory.py
+/tests/test_alpha_hosting.py
+/tests/test_maintenance_gateway.py
+__pycache__/
