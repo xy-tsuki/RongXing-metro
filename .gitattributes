@@ -1,0 +1,15 @@
+# 文本文件在仓库和工作区都固定为 LF，不受本机 core.autocrlf 影响。
+# 票价测试会校验 src/data/fuzhou-fares.json 的原始字节哈希，CRLF 检出会让它失败。
+* text=auto eol=lf
+
+# 二进制文件不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.xlsx binary
+*.sqlite binary
+*.gz binary
+*.zip binary
