@@ -42,7 +42,7 @@
 - 保持真实与合成数据隔离。真实缺失资料不套用演示设施；不按站名合并三叉街两站或水部/闽都。
 - 未知测量保持 `null` 或相应未知状态；不填默认门位、0 米、虚构分钟。来源类型、日期、方向、门位编号确认必须保留。
 - “福州电梯全覆盖”来自旧文档记录的用户前提，非本轮现场核实；有电梯不能证明已采集连续轮椅通路。电梯模式排除楼梯、扶梯与未确认轮椅边。
-- 一次单站补录保持 partial；人工推荐只作对照。完整车门组合必须成组使用，不能把各段位置并集任意拼接。
+- 一次单站补录保持 partial；人工推荐只作对照。每段推荐车门只由该段终点（换乘站或目的站）的设施决定，各段互相独立，不做跨段配套；换乘路径只记「下车门 → 下一程站台」，不含候车门，到站台后在哪个门候车由下一程自己的推荐决定（2026-11-10 用户确认，2026-11-12 实现）。
 - 本机保存的是完整个人数据副本，键按城市和基础版本隔离；没有自动迁移。涉及版本、ID、存储键或补丁格式的修改须评估旧数据兼容和备份。
 - `network:generate` 会重写真实初始快照；`data:generate` 会重写合成 JSON/CSV。不要把生成器作为常规检查运行，也不要覆盖已采集资料。`output/tools` 是本机工具，不是已纳入版本控制的部署或维护流水线。
 
@@ -96,7 +96,7 @@ npm run build:mp-weixin
 - 开发运行：`npm run dev:h5`、`npm run dev:mp-weixin`（本次未运行）。
 - 构建：`npm run build:h5`、`npm run build:mp-weixin`（本次未运行；产物写入被忽略的 `dist/`）。
 - 类型检查：`npm run typecheck`（通过）。
-- 测试：`npm test`（Vitest）。2026-11-12 连续三次完整运行均为 303 通过、0 失败、14 跳过（SQLite 测试在本机 Node 18 下跳过，CI 的 Node 24 不允许跳过）。集成测试较慢，单个用例超时在 `vitest.config.ts` 设为 20 秒。Python 测试（`tests/test_*.py`）依赖本机的部署脚本和时刻表研究脚本，已加入忽略、只在本机运行，CI 不跑。
+- 测试：`npm test`（Vitest）。2026-11-12 连续三次完整运行均为 303 通过、0 失败、14 跳过（SQLite 测试在本机 Node 18 下跳过，CI 的 Node 24 不允许跳过）；同日逐段车门改动后完整运行为 304 通过、0 失败、14 跳过。集成测试较慢，单个用例超时在 `vitest.config.ts` 设为 20 秒。Python 测试（`tests/test_*.py`）依赖本机的部署脚本和时刻表研究脚本，已加入忽略、只在本机运行，CI 不跑。
 - 数据校验：`npm run data:validate`（通过）；`npm run data:validate -- src/data/demo-network.json`；`npm run network:check`（通过）；`npm run fare:check`（通过）。
 - 会改写数据的命令，不作为常规检查：`network:generate`、`data:generate`、`fare:generate`、`data:import`、`station:import`。
 - 维护服务：`npm run maintenance:serve`、`maintenance:test`、`timetable:import`（依赖本机私有环境，细节见私有文档）。
@@ -104,7 +104,7 @@ npm run build:mp-weixin
 
 ## 架构要点
 
-- 规划流程：线网数据 → `src/core` 候选路线搜索 → 按模式在站内寻路并组合车厢/车门 → `src/navigation` 加时间、票价 → 页面只做展示。核心不依赖 Vue、存储、网络。
+- 规划流程：线网数据 → `src/core` 候选路线搜索 → 按模式在站内寻路、逐段独立推荐车门 → `src/navigation` 加时间、票价 → 页面只做展示。核心不依赖 Vue、存储、网络。
 - 真实与合成数据分开：真实线网不带站内设施；演示设施只在合成数据里，不得混用。
 - 用户补录存在本机存储，按城市和基础版本隔离，没有自动迁移；发布包由 `src/data/published*.ts`、`data-sync.ts` 拉取并缓存（具体校验与更新规则待逐项确认）。
 - `src/navigation/session.ts` 是页面共用的会话：汇总随包数据、本机个人副本和发布包，调用 `planJourney`，并保存查询、所选方案和展开状态，页面切换时保持。
