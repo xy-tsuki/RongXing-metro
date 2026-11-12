@@ -11,7 +11,7 @@ import { getStationFare } from '../src/core/fare'
 const leg = (from: string, to: string): JourneyLeg => ({serviceId:'test',lineId:'test',lineName:'测试线路',lineColor:'#176b52',direction:'终点',fromStationId:from,fromStationName:'起点',toStationId:to,toStationName:'终点',stopCount:1,rideMinutes:1,recommendations:[],recommendationStatus:'pending',recommendationBasis:[]})
 const walk = (from: string, to: string): TransferGuide => ({stationId:from,stationName:'站外衔接',fromStationId:from,toStationId:to,fromLineName:'来源',toLineName:'目标',kind:'external',path:null,instructions:[]})
 function route(from: string, to: string, values: Partial<JourneyRoute> = {}): JourneyRoute {
-  return {id:'test',legs:[leg(from,to)],transfers:[],originPath:null,destinationPath:null,doorCombinations:[],walkingMetres:null,stairCount:null,rideMinutes:1,totalMinutes:null,transferCount:0,confidence:'topology-only',equalChoicesTruncated:false,granularity:'basic',...values}
+  return {id:'test',legs:[leg(from,to)],transfers:[],originPath:null,destinationPath:null,walkingMetres:null,stairCount:null,rideMinutes:1,totalMinutes:null,transferCount:0,confidence:'topology-only',equalChoicesTruncated:false,granularity:'basic',...values}
 }
 const input = (from: string, to: string, selected = route(from,to)) => ({cityId:'fuzhou',networkVersion:network.version,from,to,route:selected})
 describe('fare UI integration', () => {

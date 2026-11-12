@@ -22,7 +22,7 @@ export function applyApprovedPositions(data: MetroDataset, route: JourneyRoute, 
   })
   if (!changed) return route
   // A newly selected local position is not part of any old optimized all-journey combination.
-  return { ...route, legs, doorCombinations: [], destinationPath: legs.at(-1)?.approvedFacilities ? null : route.destinationPath,
+  return { ...route, legs, destinationPath: legs.at(-1)?.approvedFacilities ? null : route.destinationPath,
     transfers: route.transfers.map((t, i) => {
       // 换乘只管「下车门 → 下一程站台」；下一程在哪个门候车由下一程自己的推荐决定，不能沿用被替换前的旧车门。
       const boardLine = `前往${t.toLineName}往${legs[i + 1].direction}方向站台，按下一程推荐的车门候车`

@@ -10,7 +10,7 @@ const at = (s: string) => `2026-10-17T${s}:00+08:00`
 function route(id = 'r', count = 2): JourneyRoute {
   return { id, legs: Array.from({ length: count }, (_, i) => ({ serviceId: `s${i}`, lineId: `l${i}`, lineName: `l${i}`, lineColor: '#112233', direction: '终点', fromStationId: `n${i}`, fromStationName: `n${i}`, toStationId: `n${i+1}`, toStationName: `n${i+1}`, stopCount: 1, rideMinutes: null, recommendations: [], recommendationStatus: 'pending', recommendationBasis: [] })),
     transfers: Array.from({ length: count - 1 }, (_, i) => ({ stationId: `n${i+1}`, stationName: '换乘', fromLineName: `l${i}`, toLineName: `l${i+1}`, path: null, instructions: [] })),
-    originPath: null, destinationPath: null, doorCombinations: [], walkingMetres: null, stairCount: null, rideMinutes: null, totalMinutes: null, transferCount: count-1, confidence: 'topology-only', granularity: 'basic', equalChoicesTruncated: false }
+    originPath: null, destinationPath: null, walkingMetres: null, stairCount: null, rideMinutes: null, totalMinutes: null, transferCount: count-1, confidence: 'topology-only', granularity: 'basic', equalChoicesTruncated: false }
 }
 function trip(id: string, leg: number, from: string, to: string): TestTrip {
   return { id, lineId: `l${leg}`, serviceId: `s${leg}`, type: 'local', calendar: 'all_days', quality: 'synthetic', stops: [[`n${leg}`, clock(from)], [`n${leg+1}`, clock(to)]] }

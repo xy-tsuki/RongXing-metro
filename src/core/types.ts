@@ -45,10 +45,9 @@ export interface JourneyLeg {
   approvedFacilities?: ('stairs' | 'escalator' | 'lift')[]
 }
 export interface TransferGuide { stationId: string; stationName: string; fromLineName: string; toLineName: string; path: WalkPath | null; instructions: string[]; kind?: 'in-station' | 'external'; fromStationId?: string; toStationId?: string }
-export interface DoorCombination { positions: DoorRecommendation[]; originPath: WalkPath; transferPaths: WalkPath[]; destinationPath: WalkPath }
 export interface JourneyRoute {
   id: string; legs: JourneyLeg[]; transfers: TransferGuide[]; originPath: WalkPath | null; destinationPath: WalkPath | null;
-  doorCombinations: DoorCombination[]; walkingMetres: number | null; stairCount: number | null; rideMinutes: number | null;
+  walkingMetres: number | null; stairCount: number | null; rideMinutes: number | null;
   totalMinutes: number | null; transferCount: number; confidence: 'demo' | 'verified' | 'partial' | 'topology-only'; equalChoicesTruncated: boolean;
   granularity: 'basic' | 'partial' | 'detailed'
   accessTransfers?: TransferGuide[]; egressTransfers?: TransferGuide[]

@@ -109,7 +109,7 @@ describe('departure instances and shared time geometry', () => {
       expect(item.timing.legs![path.legs.length-1].arrivalAt).toBe(item.timing.route!.arrivalAt)
       path.transfers.forEach((_,index) => expect(Date.parse(item.timing.legs![index+1].departureAt!)).toBeGreaterThan(Date.parse(item.timing.legs![index].arrivalAt!)))
     }
-    const incomplete = structuredClone(paths[0]); incomplete.doorCombinations=[]; incomplete.transfers[0].path=null
+    const incomplete = structuredClone(paths[0]); incomplete.transfers[0].path=null
     expect(demoDepartures([incomplete],window)).toEqual([])
   })
   it('keeps the chosen departure timing and board position when entering and returning from details', async () => {

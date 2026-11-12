@@ -81,7 +81,6 @@ describe('service routes and door optimization', () => {
     const route = direct().routes[0]
     expect(route.legs[0].recommendations.map(p => p.positionId)).toEqual(['p1', 'p2'])
     expect(route.legs[0].recommendations.every(p => p.arrivalPath && p.arrivalPath.metres === 22)).toBe(true)
-    expect(route.doorCombinations).toEqual([])
     expect(route.walkingMetres).toBe(44)
     expect(route.originPath!.nodes[0]).toBe('s-west:hall')
     expect(route.destinationPath!.nodes.at(-1)).toBe('s-river:hall')

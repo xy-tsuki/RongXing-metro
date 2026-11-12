@@ -209,7 +209,7 @@ function makeRoute(data: MetroDataset, rides: Ride[], plan: DoorPlan & { originP
   const walkingMetres = paths.reduce((s, p) => s + p.metres, 0), stairCount = paths.reduce((s, p) => s + p.stairCount, 0), rideMinutes = sumKnown(rides.map(r => r.minutes))
   const transfers = transferPaths.map((path, i) => ({ stationId: legs[i].toStationId, stationName: legs[i].toStationName, fromLineName: legs[i].lineName, toLineName: legs[i + 1].lineName, path, instructions: [`从${legs[i].recommendations[0].car}号车厢${legs[i].recommendations[0].door}号门下车`, ...path.instructions, `到${legs[i + 1].lineName}往${legs[i + 1].direction}方向站台后，按下一程推荐的车门候车`] }))
   const isDemo = data.provenance.kind === 'demo' || paths.some(p => p.edges.some(e => e.provenance.kind === 'demo'))
-  return { id: rides.map(r => `${r.service.id}:${r.start}-${r.end}`).join('|'), legs, transfers, originPath: plan.originPath, destinationPath, doorCombinations: [], walkingMetres, stairCount, rideMinutes, totalMinutes: rideMinutes === null ? null : rideMinutes + paths.reduce((s, p) => s + p.minutes, 0), transferCount: rides.length - 1, confidence: isDemo ? 'demo' : completeDoors ? 'verified' : 'partial', equalChoicesTruncated: plan.truncated, granularity: completeDoors ? 'detailed' : 'partial' }
+  return { id: rides.map(r => `${r.service.id}:${r.start}-${r.end}`).join('|'), legs, transfers, originPath: plan.originPath, destinationPath, walkingMetres, stairCount, rideMinutes, totalMinutes: rideMinutes === null ? null : rideMinutes + paths.reduce((s, p) => s + p.minutes, 0), transferCount: rides.length - 1, confidence: isDemo ? 'demo' : completeDoors ? 'verified' : 'partial', equalChoicesTruncated: plan.truncated, granularity: completeDoors ? 'detailed' : 'partial' }
 }
 
 function sumKnown(values: (number | null)[]): number | null { return values.some(v => v === null) ? null : values.reduce<number>((sum, v) => sum + (v ?? 0), 0) }
@@ -256,7 +256,7 @@ function makeBasicRoute(data: MetroDataset, rides: Ride[], mode: RouteMode): Jou
   })
   const partial = legs.some(l => l.recommendations.length > 0)
   return { id: rides.map(r => `${r.service.id}:${r.start}-${r.end}${r.connection ? `@${r.connection.id}` : ''}`).join('|'), legs, transfers,
-    originPath: null, destinationPath: null, doorCombinations: [], walkingMetres: null, stairCount: null, rideMinutes: sumKnown(rides.map(r => r.minutes)), totalMinutes: null, transferCount: rides.length - 1,
+    originPath: null, destinationPath: null, walkingMetres: null, stairCount: null, rideMinutes: sumKnown(rides.map(r => r.minutes)), totalMinutes: null, transferCount: rides.length - 1,
     confidence: data.provenance.kind === 'demo' ? 'demo' : partial ? 'partial' : 'topology-only', granularity: partial ? 'partial' : 'basic', equalChoicesTruncated: false }
 }
 
@@ -371,7 +371,7 @@ function attachEndpointConnections(data: MetroDataset, route: JourneyRoute, acce
   return { ...route, id: `${access ? `access:${access.id}|` : ''}${route.id}${egress ? `|egress:${egress.id}` : ''}`,
     legs, accessTransfers: access ? [externalGuide(data, access)] : [], egressTransfers: egress ? [externalGuide(data, egress)] : [],
     originPath: access ? null : route.originPath, destinationPath: egress ? null : route.destinationPath,
-    doorCombinations: [], walkingMetres: null, stairCount: null, totalMinutes: null, transferCount: route.transferCount + Number(!!access) + Number(!!egress),
+    walkingMetres: null, stairCount: null, totalMinutes: null, transferCount: route.transferCount + Number(!!access) + Number(!!egress),
     granularity: partial ? 'partial' : 'basic', confidence: route.confidence === 'demo' ? 'demo' : partial ? 'partial' : 'topology-only',
   }
 }
@@ -387,7 +387,7 @@ function planWithEndpoints(data: MetroDataset, request: PlanRequest): PlanResult
   const boundaryMessage = '出站换乘连接仅依据已记录站点关系；站外距离、用时、入口位置及连续无障碍通行尚未确认，不以0米或默认电梯路径替代。'
   if (direct) {
     const route: JourneyRoute = { id: `external-walk:${direct.id}:${request.from}`, legs: [], transfers: [], accessTransfers: [externalGuide(data, direct)], egressTransfers: [],
-      originPath: null, destinationPath: null, doorCombinations: [], walkingMetres: null, stairCount: null, rideMinutes: 0, totalMinutes: null,
+      originPath: null, destinationPath: null, walkingMetres: null, stairCount: null, rideMinutes: 0, totalMinutes: null,
       transferCount: 1, confidence: data.provenance.kind === 'demo' ? 'demo' : 'topology-only', granularity: 'basic', equalChoicesTruncated: false }
     return { status: request.mode === 'elevator' ? 'incomplete' : 'ok', routes: [route], diagnostics: [boundaryMessage, '两站已有直接出站连接，无需为了到达相邻换乘站绕行乘车。'] }
   }
