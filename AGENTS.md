@@ -96,7 +96,7 @@ npm run build:mp-weixin
 - 开发运行：`npm run dev:h5`、`npm run dev:mp-weixin`（本次未运行）。
 - 构建：`npm run build:h5`、`npm run build:mp-weixin`（本次未运行；产物写入被忽略的 `dist/`）。
 - 类型检查：`npm run typecheck`（通过）。
-- 测试：`npm test`（Vitest）。完整运行 44/46 个文件通过，`tests/departure-board.test.ts` 与 `tests/navigation-ui.test.ts` 各有 1 项 5 秒超时；单独重跑全部通过，但耗时 4.7–4.9 秒，见“已知问题”。Python 测试（`tests/test_*.py`）依赖本机的部署脚本和时刻表研究脚本，已加入忽略、只在本机运行，CI 不跑。
+- 测试：`npm test`（Vitest）。2026-11-12 连续三次完整运行均为 303 通过、0 失败、14 跳过（SQLite 测试在本机 Node 18 下跳过，CI 的 Node 24 不允许跳过）。集成测试较慢，单个用例超时在 `vitest.config.ts` 设为 20 秒。Python 测试（`tests/test_*.py`）依赖本机的部署脚本和时刻表研究脚本，已加入忽略、只在本机运行，CI 不跑。
 - 数据校验：`npm run data:validate`（通过）；`npm run data:validate -- src/data/demo-network.json`；`npm run network:check`（通过）；`npm run fare:check`（通过）。
 - 会改写数据的命令，不作为常规检查：`network:generate`、`data:generate`、`fare:generate`、`data:import`、`station:import`。
 - 维护服务：`npm run maintenance:serve`、`maintenance:test`、`timetable:import`（依赖本机私有环境，细节见私有文档）。
@@ -111,8 +111,8 @@ npm run build:mp-weixin
 
 ## 已知问题
 
-- `npm test` 在负载高时会出现 5 秒超时：2026-11-09 完整运行先后出现 2 项、4 项（`departure-board`、`navigation-ui`、`navigation-details`、`maintenance-sync`），单独重跑均通过。CI 上也可能偶发，原因待查，尚未调整超时。
-- 本机系统 Git 设置了 `core.autocrlf=true`，新检出的 `src/data/fuzhou-fares.json` 会变成 CRLF，使 `tests/fare-presentation.test.ts` 的源文件哈希校验失败；Linux CI 不受影响。可考虑加 `.gitattributes` 固定 LF，尚未处理。
+- 会话、发布包等集成测试要在真实线网上连续做多次完整规划，单个用例 4–7 秒；2026-11-12 已把用例超时从默认 5 秒放宽到 20 秒。若再出现超时，先查是否有用例变慢，不要直接继续加大超时。
+- `.gitattributes` 固定文本文件为 LF（2026-11-12），新检出不再受本机 `core.autocrlf=true` 影响；`tests/fare-presentation.test.ts` 会校验 `src/data/fuzhou-fares.json` 的原始字节哈希，不要用会改换行的工具保存它。
 - 2026-11-09 已把 Codex 时期积压的未提交改动按功能分组提交到 `dev`；归属依据 Codex 导出记录，见 `docs/devlog.md`。提交时仍按文件 `git add`，不要整体添加。
 - 微信开发者工具与真机未验收；真实站内数据尚未采集，V1 精细导航不能宣称完成。
 - 私有文档（STATUS、decisions、PRD、architecture）不在公开仓库里，克隆者看不到。
