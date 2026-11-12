@@ -10,7 +10,7 @@ export const facilitiesIn = (path?: WalkPath | null): FacilityKind[] =>
 export const compactInstruction = (instruction: string, stationName: string): string =>
   transitDisplayText(instruction).split(stationName).join('').replace('（出口未指定）', '')
 
-export interface PositionChoice { position: DoorRecommendation; combinationIndex: number | null }
+export interface PositionChoice { position: DoorRecommendation }
 
 export function groupEquivalentPositions(choices: PositionChoice[]): { car: number; doors: number[] }[] {
   const groups = new Map<number, Set<number>>()
@@ -30,29 +30,16 @@ export function transferOverview(guide: TransferGuide, path?: WalkPath | null): 
 
 export function recommendationFacilities(route: JourneyRoute, index: number): FacilityKind[] {
   if (route.legs[index]?.approvedFacilities?.length) return route.legs[index].approvedFacilities!
-  const paths = route.doorCombinations.length
-    ? route.doorCombinations.map((_, ci) => arrivalPathFor(route, index, ci))
-    : [arrivalPathFor(route, index, 0)]
-  return [...new Set(paths.flatMap(facilitiesIn))]
+  const paths = (route.legs[index]?.recommendations ?? []).flatMap(position => position.arrivalPath ? [position.arrivalPath] : [])
+  return [...new Set((paths.length ? paths : [arrivalPathFor(route, index)]).flatMap(facilitiesIn))]
 }
-/** Keep a position linked to a complete compatible journey, never build a Cartesian product in the UI. */
-export function positionChoices(route: JourneyRoute, legIndex: number, selectedCombination: number): PositionChoice[] {
-  const choices = new Map<string, PositionChoice>()
-  route.doorCombinations.forEach((combination, index) => {
-    const position = combination.positions[legIndex]
-    if (!position) return
-    const key = `${position.car}:${position.door}`
-    if (!choices.has(key) || index === selectedCombination) choices.set(key, { position, combinationIndex: index })
-  })
-  if (!route.doorCombinations.length) for (const position of route.legs[legIndex]?.recommendations ?? []) {
-    choices.set(`${position.car}:${position.door}`, { position, combinationIndex: null })
-  }
-  return [...choices.values()]
+/** 每段的推荐门只由该段终点的设施决定，各段互相独立；这里只按本段原样列出，不做跨段配套。 */
+export function positionChoices(route: JourneyRoute, legIndex: number): PositionChoice[] {
+  return (route.legs[legIndex]?.recommendations ?? []).map(position => ({ position }))
 }
 
-export function arrivalPathFor(route: JourneyRoute, legIndex: number, selectedCombination: number): WalkPath | null {
-  const combination = route.doorCombinations[selectedCombination]
-  if (combination) return legIndex < route.legs.length - 1 ? combination.transferPaths[legIndex] ?? null : combination.destinationPath
+/** 本段下车后的通路：换乘站为「下车门 → 下一程站台」，目的站为「下车门 → 付费站厅」。 */
+export function arrivalPathFor(route: JourneyRoute, legIndex: number): WalkPath | null {
   return route.legs[legIndex]?.arrivalPath ?? route.transfers[legIndex]?.path ??
     (legIndex === route.legs.length - 1 ? route.destinationPath : null)
 }

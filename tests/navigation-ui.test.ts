@@ -32,23 +32,21 @@ describe('optional navigation timing presentation',()=>{
 })
 
 describe('shared three-page navigation state',()=>{
-  it('retains query, selected plan, combination and expanded details between page instances',async()=>{
+  it('retains query, selected plan and expanded details between page instances',async()=>{
     vi.stubGlobal('uni',{getStorageSync:()=>undefined})
     const {useJourneySession}=await import('../src/navigation/session')
     const search=useJourneySession()
     search.useDataset('demo');search.calculate()
-    search.selectedRoute.value=1;search.selectedCombination.value=1
-    search.combinationChosen.value=true;search.detailExpanded.value=['transfer-0'];search.detailScrollTop.value=250
+    search.selectedRoute.value=1
+    search.detailExpanded.value=['transfer-0'];search.detailScrollTop.value=250
     const secondPage=useJourneySession()
     expect(secondPage).toBe(search)
     expect(secondPage.from.value).toBe('s-west')
     expect(secondPage.selectedRoute.value).toBe(1)
-    expect(secondPage.selectedCombination.value).toBe(1)
     expect(secondPage.detailExpanded.value).toEqual(['transfer-0'])
     expect(secondPage.detailScrollTop.value).toBe(250)
     secondPage.changeMode('elevator')
     expect(secondPage.selectedRoute.value).toBe(0)
-    expect(secondPage.combinationChosen.value).toBe(false)
     expect(secondPage.detailExpanded.value).toEqual([])
     expect(secondPage.route.value?.legs[0].recommendations[0].car).toBe(2)
     vi.unstubAllGlobals()

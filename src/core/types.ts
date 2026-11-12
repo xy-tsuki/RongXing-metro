@@ -34,7 +34,8 @@ export interface ApprovedFacilityPosition {
 }
 export interface ExternalTransfer { id: string; fromStationId: string; toStationId: string; bidirectional: boolean; walkingMetres: number | null; minutes: number | null; wheelchair: 'confirmed' | 'blocked' | 'unknown'; provenance: Provenance }
 export interface WalkPath { nodes: string[]; edges: WalkEdge[]; metres: number; minutes: number; stairCount: number; instructions: string[] }
-export interface DoorRecommendation { car: number; door: number; positionId: string }
+/** arrivalPath：该推荐门到下一程站台（换乘）或付费站厅（目的站）的通路；审核门位等无测量通路时为空。 */
+export interface DoorRecommendation { car: number; door: number; positionId: string; arrivalPath?: WalkPath | null }
 export interface JourneyLeg {
   serviceId: string; lineId: string; lineName: string; lineColor: string; direction: string;
   fromStationId: string; fromStationName: string; toStationId: string; toStationName: string;

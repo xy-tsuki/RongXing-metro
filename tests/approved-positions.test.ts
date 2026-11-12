@@ -44,7 +44,7 @@ describe('reviewed facility positions used in planning', () => {
       const route = result.routes.find(r => r.legs.length === 1 && r.legs[0].lineId === 'fz-l2')!
       expect(route.legs[0].recommendations.map(p => p.door)).toEqual(expected)
       expect(recommendationFacilities(route, 0)).toEqual(['lift'])
-      expect(positionChoices(route, 0, 0)).toHaveLength(2)
+      expect(positionChoices(route, 0)).toHaveLength(2)
       expect(route.destinationPath).toBeNull()
       expect(route.walkingMetres).toBeNull()
       expect(route.doorCombinations).toEqual([])

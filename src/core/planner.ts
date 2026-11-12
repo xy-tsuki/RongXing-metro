@@ -1,10 +1,11 @@
 import { applyApprovedPositions } from './approved-positions'
-import type { DoorCombination, DoorPosition, ExternalTransfer, JourneyLeg, JourneyRoute, MetroDataset, PlanRequest, PlanResult, RouteMode, Service, WalkEdge, WalkPath } from './types'
+import type { DoorPosition, ExternalTransfer, JourneyLeg, JourneyRoute, MetroDataset, PlanRequest, PlanResult, RouteMode, Service, WalkEdge, WalkPath } from './types'
 import { validateDataset } from './validation'
 
 type Metric = [number, number, number]
 interface Ride { service: Service; start: number; end: number; minutes: number | null; connection?: ExternalTransfer }
-interface Choice { positions: DoorPosition[]; paths: WalkPath[]; metric: Metric }
+interface LegOption { position: DoorPosition; path: WalkPath }
+interface DoorPlan { originPath: WalkPath | null; legs: LegOption[][]; truncated: boolean }
 const MAX_LEGS = 4, MAX_CANDIDATES = 500, MAX_EXPANSIONS = 20_000, MAX_EQUAL_CHOICES = 256
 const EPS = 1e-6
 function compare(a: number[], b: number[]): number {
@@ -137,8 +138,16 @@ function enumerateRides(data: MetroDataset, request: PlanRequest): { candidates:
   return { candidates, truncated }
 }
 
-function optimizeDoors(data: MetroDataset, rides: Ride[], mode: RouteMode, cache: Map<string, WalkPath | null>): { choices: Choice[]; truncated: boolean } {
-  if (rides.some(r => r.connection)) return { choices: [], truncated: false }
+/**
+ * 逐段独立推荐车门（2026-11-10 确认的换乘模型）：
+ * - 每段推荐的车门只由该段终点（换乘站或目的站）的设施决定，各段之间没有配套关系；
+ * - 换乘路径是「下车门 → 下一程站台」，站台以其全部车门节点作为目标，不含下一程的候车门；
+ * - 起点路径是「付费站厅 → 首段站台」，目的站路径是「下车门 → 付费站厅」。
+ * 任一段没有可用的门或通路，则整条候选不可行。
+ */
+function optimizeDoors(data: MetroDataset, rides: Ride[], mode: RouteMode, cache: Map<string, WalkPath | null>): DoorPlan {
+  const none: DoorPlan = { originPath: null, legs: [], truncated: false }
+  if (rides.some(r => r.connection)) return none
   const platforms = new Map(data.platforms.map(p => [p.id, p])), formations = new Map(data.formations.map(f => [f.id, f]))
   const stations = new Map(data.stations.map(s => [s.id, s]))
   const walk = (from: string[], to: string[]) => {
@@ -146,66 +155,61 @@ function optimizeDoors(data: MetroDataset, rides: Ride[], mode: RouteMode, cache
     if (!cache.has(key)) cache.set(key, findWalkPath(data, from, to, mode))
     return cache.get(key)!
   }
-  let states = new Map<string, Choice[]>(), truncated = false
-  rides.forEach((ride, legIndex) => {
-    const board = platforms.get(ride.service.stops[ride.start].platformId ?? '')
-    const nextStates = new Map<string, Choice[]>()
-    if (!board) { states = nextStates; return }
-    for (const position of formations.get(ride.service.formationId)!.positions) {
-      if (formations.get(ride.service.formationId)!.numberingStatus === 'unknown' && position.numberingConfirmed !== true) continue
-      if (!board.doorNodes[position.id]) continue
-      const candidates: Choice[] = []
-      if (legIndex === 0) {
-        const path = walk(stations.get(ride.service.stops[ride.start].stationId)!.concourseNodeIds, [board.doorNodes[position.id]])
-        if (path) candidates.push({ positions: [position], paths: [path], metric: metric(path, mode) })
-      } else {
-        const previousRide = rides[legIndex - 1]
-        const alight = platforms.get(previousRide.service.stops[previousRide.end].platformId ?? '')
-        if (!alight) continue
-        for (const choices of states.values()) for (const choice of choices) {
-          const previousPosition = choice.positions[choice.positions.length - 1]
-          if (!alight.doorNodes[previousPosition.id]) continue
-          const path = walk([alight.doorNodes[previousPosition.id]], [board.doorNodes[position.id]])
-          if (path) candidates.push({ positions: [...choice.positions, position], paths: [...choice.paths, path], metric: add(choice.metric, metric(path, mode)) })
-        }
-      }
-      candidates.sort((a, b) => compare(a.metric, b.metric))
-      const equal = candidates.filter(c => compare(c.metric, candidates[0].metric) === 0)
-      if (equal.length > MAX_EQUAL_CHOICES) truncated = true
-      if (equal.length) nextStates.set(position.id, equal.slice(0, MAX_EQUAL_CHOICES))
+  const nodeLabels = new Map(data.walkNodes.map(n => [n.id, n.label]))
+  const platformAt = (ride: Ride, index: number) => platforms.get(ride.service.stops[index].platformId ?? '')
+  const first = rides[0], boarding = platformAt(first, first.start)
+  if (!boarding) return none
+  const originPath = walk(stations.get(first.service.stops[first.start].stationId)!.concourseNodeIds, Object.values(boarding.doorNodes))
+  if (!originPath) return none
+  let truncated = false
+  const legs: LegOption[][] = []
+  for (let legIndex = 0; legIndex < rides.length; legIndex++) {
+    const ride = rides[legIndex], alight = platformAt(ride, ride.end), formation = formations.get(ride.service.formationId)!
+    if (!alight) return none
+    const nextRide = rides[legIndex + 1]
+    const nextPlatform = nextRide ? platformAt(nextRide, nextRide.start) : undefined
+    if (nextRide && !nextPlatform) return none
+    const targets = nextPlatform ? Object.values(nextPlatform.doorNodes) : stations.get(ride.service.stops[ride.end].stationId)!.concourseNodeIds
+    // 换乘只到站台：路径末端的车门节点只是「到达站台」的代表点，说明文字不能让它变成候车门。
+    const platformText = nextRide ? `${data.lines.find(l => l.id === nextRide.service.lineId)!.name}往${nextRide.service.direction}方向站台` : ''
+    const options: LegOption[] = []
+    for (const position of formation.positions) {
+      if (formation.numberingStatus === 'unknown' && position.numberingConfirmed !== true) continue
+      const node = alight.doorNodes[position.id]
+      if (!node) continue
+      const found = walk([node], targets)
+      if (!found) continue
+      const endLabel = nextRide ? nodeLabels.get(found.nodes[found.nodes.length - 1]) : undefined
+      const path = endLabel ? { ...found, instructions: found.instructions.map((text, i) => i === found.instructions.length - 1 ? text.split(endLabel).join(platformText) : text) } : found
+      options.push({ position, path })
     }
-    states = nextStates
-  })
-  const last = rides[rides.length - 1], alight = platforms.get(last.service.stops[last.end].platformId ?? '')
-  const final: Choice[] = []
-  if (!alight) return { choices: [], truncated }
-  for (const choices of states.values()) for (const choice of choices) {
-    if (!alight.doorNodes[choice.positions[choice.positions.length - 1].id]) continue
-    const path = walk([alight.doorNodes[choice.positions[choice.positions.length - 1].id]], stations.get(last.service.stops[last.end].stationId)!.concourseNodeIds)
-    if (path) final.push({ positions: choice.positions, paths: [...choice.paths, path], metric: add(choice.metric, metric(path, mode)) })
+    if (!options.length) return none
+    options.sort((a, b) => compare(metric(a.path, mode), metric(b.path, mode)))
+    const equal = options.filter(o => compare(metric(o.path, mode), metric(options[0].path, mode)) === 0)
+    if (equal.length > MAX_EQUAL_CHOICES) truncated = true
+    legs.push(equal.slice(0, MAX_EQUAL_CHOICES))
   }
-  final.sort((a, b) => compare(a.metric, b.metric))
-  const equal = final.filter(c => compare(c.metric, final[0].metric) === 0)
-  if (equal.length > MAX_EQUAL_CHOICES) truncated = true
-  return { choices: equal.slice(0, MAX_EQUAL_CHOICES), truncated }
+  return { originPath, legs, truncated }
 }
 
-function makeRoute(data: MetroDataset, rides: Ride[], optimized: { choices: Choice[]; truncated: boolean }): JourneyRoute {
+function makeRoute(data: MetroDataset, rides: Ride[], plan: DoorPlan & { originPath: WalkPath }): JourneyRoute {
   const stations = new Map(data.stations.map(x => [x.id, x])), lines = new Map(data.lines.map(x => [x.id, x]))
-  const recommendation = (p: DoorPosition) => ({ car: p.car, door: p.door, positionId: p.id })
-  const combos: DoorCombination[] = optimized.choices.map(c => ({ positions: c.positions.map(recommendation), originPath: c.paths[0], transferPaths: c.paths.slice(1, -1), destinationPath: c.paths[c.paths.length - 1] }))
-  const primary = combos[0]
+  const recommendation = (o: LegOption) => ({ car: o.position.car, door: o.position.door, positionId: o.position.id, arrivalPath: o.path })
   const completeDoors = rides.every(r => { const f = data.formations.find(f => f.id === r.service.formationId)!; return f.doorsKnown !== false && f.numberingStatus !== 'unknown' })
   const legs = rides.map((r, index) => {
     const line = lines.get(r.service.lineId)!, fromStationId = r.service.stops[r.start].stationId, toStationId = r.service.stops[r.end].stationId
-    const unique = new Map(combos.map(c => [c.positions[index].positionId, c.positions[index]]))
-    return { serviceId: r.service.id, lineId: line.id, lineName: line.name, lineColor: line.color, direction: r.service.direction, fromStationId, fromStationName: stations.get(fromStationId)!.name, toStationId, toStationName: stations.get(toStationId)!.name, stopCount: r.end - r.start, rideMinutes: r.minutes, recommendations: [...unique.values()], recommendationStatus: completeDoors ? 'complete' as const : 'local' as const, recommendationBasis: [completeDoors ? '依据全程连续站内通道及固定车门位置联合优化' : '仅在已记录且编号已确认的车门范围内按连续站内路径联合比较；未覆盖尚未采集的车门，不能保证全车最优'], arrivalPath: optimized.choices[0].paths[index + 1], formationCars: data.formations.find(f => f.id === r.service.formationId)!.cars }
+    const formation = data.formations.find(f => f.id === r.service.formationId)!
+    const legComplete = formation.doorsKnown !== false && formation.numberingStatus !== 'unknown'
+    const options = plan.legs[index]
+    return { serviceId: r.service.id, lineId: line.id, lineName: line.name, lineColor: line.color, direction: r.service.direction, fromStationId, fromStationName: stations.get(fromStationId)!.name, toStationId, toStationName: stations.get(toStationId)!.name, stopCount: r.end - r.start, rideMinutes: r.minutes, recommendations: options.map(recommendation), recommendationStatus: legComplete ? 'complete' as const : 'local' as const, recommendationBasis: [legComplete ? '依据本段终点站的连续站内通道与站台设施独立优化；各段推荐互不关联' : '仅在已记录且编号已确认的车门范围内，按本段终点站的连续站内路径比较；未覆盖尚未采集的车门，不能保证全车最优'], arrivalPath: options[0].path, formationCars: formation.cars }
   })
-  const paths = [primary.originPath, ...primary.transferPaths, primary.destinationPath]
+  const destinationPath = plan.legs[plan.legs.length - 1][0].path
+  const transferPaths = plan.legs.slice(0, -1).map(options => options[0].path)
+  const paths = [plan.originPath, ...transferPaths, destinationPath]
   const walkingMetres = paths.reduce((s, p) => s + p.metres, 0), stairCount = paths.reduce((s, p) => s + p.stairCount, 0), rideMinutes = sumKnown(rides.map(r => r.minutes))
-  const transfers = primary.transferPaths.map((path, i) => ({ stationId: legs[i].toStationId, stationName: legs[i].toStationName, fromLineName: legs[i].lineName, toLineName: legs[i + 1].lineName, path, instructions: [`从${primary.positions[i].car}号车厢${primary.positions[i].door}号门下车`, ...path.instructions, `在${legs[i + 1].lineName}往${legs[i + 1].direction}方向，前往${primary.positions[i + 1].car}号车厢${primary.positions[i + 1].door}号门候车`] }))
+  const transfers = transferPaths.map((path, i) => ({ stationId: legs[i].toStationId, stationName: legs[i].toStationName, fromLineName: legs[i].lineName, toLineName: legs[i + 1].lineName, path, instructions: [`从${legs[i].recommendations[0].car}号车厢${legs[i].recommendations[0].door}号门下车`, ...path.instructions, `到${legs[i + 1].lineName}往${legs[i + 1].direction}方向站台后，按下一程推荐的车门候车`] }))
   const isDemo = data.provenance.kind === 'demo' || paths.some(p => p.edges.some(e => e.provenance.kind === 'demo'))
-  return { id: rides.map(r => `${r.service.id}:${r.start}-${r.end}`).join('|'), legs, transfers, originPath: primary.originPath, destinationPath: primary.destinationPath, doorCombinations: combos, walkingMetres, stairCount, rideMinutes, totalMinutes: rideMinutes === null ? null : rideMinutes + paths.reduce((s, p) => s + p.minutes, 0), transferCount: rides.length - 1, confidence: isDemo ? 'demo' : completeDoors ? 'verified' : 'partial', equalChoicesTruncated: optimized.truncated, granularity: completeDoors ? 'detailed' : 'partial' }
+  return { id: rides.map(r => `${r.service.id}:${r.start}-${r.end}`).join('|'), legs, transfers, originPath: plan.originPath, destinationPath, doorCombinations: [], walkingMetres, stairCount, rideMinutes, totalMinutes: rideMinutes === null ? null : rideMinutes + paths.reduce((s, p) => s + p.minutes, 0), transferCount: rides.length - 1, confidence: isDemo ? 'demo' : completeDoors ? 'verified' : 'partial', equalChoicesTruncated: plan.truncated, granularity: completeDoors ? 'detailed' : 'partial' }
 }
 
 function sumKnown(values: (number | null)[]): number | null { return values.some(v => v === null) ? null : values.reduce<number>((sum, v) => sum + (v ?? 0), 0) }
@@ -288,7 +292,7 @@ function indoorEvidence(data: MetroDataset, rides: Ride[], mode: RouteMode, cach
   return { unknown, blocked }
 }
 
-/** Enumerates bounded service itineraries, then DP over fixed in-train door positions. */
+/** Enumerates bounded service itineraries, then picks each leg's door independently from its end-station facilities. */
 function planCoreJourney(data: MetroDataset, request: PlanRequest): PlanResult {
   const errors = validateDataset(data)
   if (errors.length) return { status: 'invalid', routes: [], diagnostics: errors }
@@ -302,8 +306,8 @@ function planCoreJourney(data: MetroDataset, request: PlanRequest): PlanResult {
   const feasible: { route: JourneyRoute; rides: Ride[] }[] = []
   const walkCache = new Map<string, WalkPath | null>()
   for (const rides of candidates) {
-    const optimized = optimizeDoors(data, rides, request.mode, walkCache)
-    if (optimized.choices.length) feasible.push({ route: makeRoute(data, rides, optimized), rides })
+    const plan = optimizeDoors(data, rides, request.mode, walkCache)
+    if (plan.originPath && plan.legs.length === rides.length) feasible.push({ route: makeRoute(data, rides, { ...plan, originPath: plan.originPath }), rides })
   }
   if (!feasible.length) {
     const unknownCandidates = candidates.filter(rides => { const evidence = indoorEvidence(data, rides, request.mode, walkCache); return evidence.unknown && !evidence.blocked })
@@ -342,8 +346,8 @@ function planCoreJourney(data: MetroDataset, request: PlanRequest): PlanResult {
   const routeCost = (r: JourneyRoute) => (request.mode === 'few-stairs' ? [r.stairCount, r.walkingMetres, r.totalMinutes, r.transferCount] : [r.walkingMetres, r.stairCount, r.totalMinutes, r.transferCount]).map(v => v ?? Infinity)
   routes.sort((a, b) => compare(routeCost(a), routeCost(b)))
   if (truncated) diagnostics.push('候选搜索达到安全上限，结果不保证覆盖所有交路，请缩小网络或完善搜索策略。')
-  if (routes.some(r => r.equalChoicesTruncated)) diagnostics.push('等价车门组合超过256个，已截取；各段展示的位置须按同一组合使用。')
-  diagnostics.push('车厢号按本交路编组编号；候车时应以现场车厢标识核对，不能简单理解为从行进方向数第几节。', '车门按全程固定位置优化；多个推荐位置须配合对应的完整车门组合，不能跨组合随意拼接。')
+  if (routes.some(r => r.equalChoicesTruncated)) diagnostics.push('某段等价车门超过256个，已截取。')
+  diagnostics.push('车厢号按本交路编组编号；候车时应以现场车厢标识核对，不能简单理解为从行进方向数第几节。', '每段推荐车门只由该段终点站的设施决定，各段互相独立；换乘路径终点是下一程站台，到站台后在哪个门候车由下一程自己的推荐决定。')
   const consideredStations = new Set(candidates.flatMap(r => [r[0].service.stops[r[0].start].stationId, ...r.map(leg => leg.service.stops[leg.end].stationId)]))
   if (data.stations.some(s => consideredStations.has(s.id) && s.indoorData !== 'complete') || data.walkNodes.some(n => consideredStations.has(n.stationId) && n.knowledge === 'unknown') || data.walkEdges.some(e => (e.knowledge === 'unknown' || request.mode === 'elevator' && e.wheelchair === 'unknown') && consideredStations.has(data.walkNodes.find(n => n.id === e.from)!.stationId))) diagnostics.push('相关车站存在部分未采集或未确认的设施与通行性。当前方案仅在已确认的连续通道内优化，不能保证在未采集路径范围内仍为最优。')
   if (routes.length > 6) diagnostics.push(`已找到${routes.length}条合规候选，界面显示成本最低的6条。`)

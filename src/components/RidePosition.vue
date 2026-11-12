@@ -5,7 +5,7 @@ import type { Formation, JourneyLeg, WalkPath } from '../core/types'
 import type { FacilityKind, PositionChoice } from './route-presentation'
 import { groupEquivalentPositions } from './route-presentation'
 import FacilityLabel from './FacilityLabel.vue'
-const props = defineProps<{ leg: JourneyLeg; formation?: Formation; choices: PositionChoice[]; path: WalkPath | null; demo: boolean; facilities: FacilityKind[]; linked: boolean }>()
+const props = defineProps<{ leg: JourneyLeg; formation?: Formation; choices: PositionChoice[]; path: WalkPath | null; demo: boolean; facilities: FacilityKind[]; pathShown: boolean }>()
 const details = ref(false)
 const groups = computed(() => groupEquivalentPositions(props.choices))
 </script>
@@ -24,9 +24,9 @@ const groups = computed(() => groupEquivalentPositions(props.choices))
       <text v-if="choices.length > 1" class="detail-text">所列门号同等推荐，仅在已录入通路内比较。</text>
       <text v-if="demo" class="detail-text">合成演示建议，不用于真实乘车。</text>
       <text v-for="(basis, index) in leg.recommendationBasis" :key="index" class="detail-text">{{ transitDisplayText(basis) }}</text>
-      <text v-if="path" class="detail-text">一组相容搭配对应通路：步行 {{ Math.round(path.metres) }} 米，{{ path.stairCount ? path.stairCount + ' 级普通楼梯' : '无普通楼梯' }}。不同乘车段请按同一整程搭配使用。</text>
+      <text v-if="path" class="detail-text">下车后的通路：步行 {{ Math.round(path.metres) }} 米，{{ path.stairCount ? path.stairCount + ' 级普通楼梯' : '无普通楼梯' }}。本段推荐只由本段终点站的设施决定，与其他乘车段无关。</text>
       <text v-else class="detail-text">{{ leg.approvedFacilities?.length ? '门位已审核；连接楼层与完整通路尚待补充。' : '设施位置、连接楼层与通行方向待采集。' }}</text>
-      <template v-if="!linked && path"><text class="detail-text">首个局部位置对应的已录入通路：</text><text v-for="(instruction, index) in path.instructions" :key="index" class="detail-text">{{ index + 1 }}. {{ transitDisplayText(instruction) }}</text></template>
+      <template v-if="!pathShown && path"><text class="detail-text">首个推荐位置对应的已录入通路：</text><text v-for="(instruction, index) in path.instructions" :key="index" class="detail-text">{{ index + 1 }}. {{ transitDisplayText(instruction) }}</text></template>
       <view v-if="formation" class="formation"><text v-for="car in formation.cars" :key="car" class="formation-car">{{ car }}车</text></view>
       <text class="detail-text">{{ formation?.cars ?? leg.formationCars ?? '未知' }} 节编组，不表示行进方向。{{ formation?.numberingStatus === 'unknown' || !formation?.positions.length ? '门数和编号待核实。' : '编号以现场标识为准。' }}</text>
       <slot/>

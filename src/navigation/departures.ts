@@ -50,7 +50,7 @@ export function demoDepartures(routes: JourneyRoute[], window: DepartureWindow):
         timing.legs![index] = { source: 'demo', departureAt: new Date(cursor).toISOString(), arrivalAt: new Date(arrival).toISOString(), durationMinutes: leg.rideMinutes! }
         cursor = arrival
         if (route.transfers[index]) {
-          const walking = route.doorCombinations[0]?.transferPaths[index]?.minutes ?? route.transfers[index].path?.minutes
+          const walking = route.transfers[index].path?.minutes
           // No unconfirmed transfer is promoted into a timed itinerary, even in this fixture.
           if (walking === undefined) { cursor = NaN; return }
           const mockWalking = Math.ceil(walking)

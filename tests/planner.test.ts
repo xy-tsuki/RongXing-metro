@@ -74,34 +74,61 @@ describe('service routes and door optimization', () => {
       expect(result.routes[0].transferCount).toBe(transferCount)
       expect(result.routes[0].legs.length).toBe(transferCount + 1)
       expect(result.routes[0].transfers.length).toBe(transferCount)
-      if (id === 'multi-transfer') expect(result.routes[0].doorCombinations[0].positions.map(position => position.car)).toEqual([1, 2, 3])
+      if (id === 'multi-transfer') expect(result.routes[0].legs.map(leg => leg.recommendations[0].car)).toEqual([1, 2, 3])
     }
   })
-  it('returns multiple globally equivalent doors, not one arbitrarily chosen door', () => {
+  it('returns every equally good door of a leg, each with its own arrival path', () => {
     const route = direct().routes[0]
     expect(route.legs[0].recommendations.map(p => p.positionId)).toEqual(['p1', 'p2'])
-    expect(route.doorCombinations.length).toBe(2)
+    expect(route.legs[0].recommendations.every(p => p.arrivalPath && p.arrivalPath.metres === 22)).toBe(true)
+    expect(route.doorCombinations).toEqual([])
     expect(route.walkingMetres).toBe(44)
     expect(route.originPath!.nodes[0]).toBe('s-west:hall')
     expect(route.destinationPath!.nodes.at(-1)).toBe('s-river:hall')
     expect(route.confidence).toBe('demo')
   })
-  it('uses directional platforms and keeps each chosen door position fixed while riding', () => {
+  it('uses directional platforms: each door starts at its own end-station platform and transfers end at the next platform', () => {
     const reverse = planJourney(demoDataset, { from: 's-river', to: 's-west', mode: 'shortest' }).routes[0]
     expect(reverse.legs[0].direction).toBe('西门')
     expect(reverse.legs[0].recommendations.map(p => p.positionId)).toEqual(['p5', 'p6'])
     const route = planJourney(demoDataset, { from: 's-west', to: 's-bay', mode: 'shortest' }).routes[0]
-    for (const combination of route.doorCombinations) {
-      route.legs.forEach((leg, i) => {
-        const service = demoDataset.services.find(s => s.id === leg.serviceId)!
-        const start = demoDataset.platforms.find(p => p.id === service.stops.find(s => s.stationId === leg.fromStationId)!.platformId)!
-        const end = demoDataset.platforms.find(p => p.id === service.stops.find(s => s.stationId === leg.toStationId)!.platformId)!
-        const before = i === 0 ? combination.originPath : combination.transferPaths[i - 1]
-        const after = i === route.legs.length - 1 ? combination.destinationPath : combination.transferPaths[i]
-        expect(before.nodes.at(-1)).toBe(start.doorNodes[combination.positions[i].positionId])
-        expect(after.nodes[0]).toBe(end.doorNodes[combination.positions[i].positionId])
-      })
+    const platformOf = (serviceId: string, stationId: string) => {
+      const service = demoDataset.services.find(s => s.id === serviceId)!
+      return demoDataset.platforms.find(p => p.id === service.stops.find(s => s.stationId === stationId)!.platformId)!
     }
+    expect(Object.values(platformOf(route.legs[0].serviceId, route.legs[0].fromStationId).doorNodes)).toContain(route.originPath!.nodes.at(-1))
+    route.legs.forEach((leg, i) => {
+      const end = platformOf(leg.serviceId, leg.toStationId)
+      for (const recommendation of leg.recommendations) {
+        const path = recommendation.arrivalPath!
+        expect(path.nodes[0]).toBe(end.doorNodes[recommendation.positionId])
+        if (i < route.legs.length - 1) expect(Object.values(platformOf(route.legs[i + 1].serviceId, route.legs[i + 1].fromStationId).doorNodes)).toContain(path.nodes.at(-1))
+        else expect(demoDataset.stations.find(s => s.id === leg.toStationId)!.concourseNodeIds).toContain(path.nodes.at(-1))
+      }
+    })
+  })
+  it('chooses each leg independently: changing the destination doors never changes earlier legs', () => {
+    const request = { from: 's-west', to: 's-bay', mode: 'shortest' as const }
+    const before = planJourney(demoDataset, request).routes[0]
+    const d = clone()
+    for (const edge of d.walkEdges) {
+      const doorId = edge.to.startsWith('s-bay:') && edge.to.match(/:p([1-6])$/)?.[1]
+      if (edge.kind === 'walk' && doorId) { edge.metres = ['1', '2'].includes(doorId) ? 0 : 150; edge.seconds = Math.max(1, edge.metres) }
+    }
+    expect(validateDataset(d)).toEqual([])
+    const after = planJourney(d, request).routes.find(r => r.id === before.id)!
+    expect(after.legs.at(-1)!.recommendations.map(p => p.positionId)).not.toEqual(before.legs.at(-1)!.recommendations.map(p => p.positionId))
+    for (let i = 0; i < before.legs.length - 1; i++) expect(after.legs[i].recommendations).toEqual(before.legs[i].recommendations)
+    expect(after.transfers.map(t => t.path)).toEqual(before.transfers.map(t => t.path))
+  })
+  it('ends a transfer at the next platform and never names a boarding door', () => {
+    const route = planJourney(demoDataset, demoScenarios.find(s => s.id === 'one-transfer')!).routes[0]
+    const text = route.transfers[0].instructions.join(' ')
+    expect(route.transfers[0].instructions[0]).toMatch(/号车厢\d+号门下车/)
+    expect(text).toContain('方向站台')
+    expect(text).toContain('按下一程推荐的车门候车')
+    expect(text).not.toMatch(/\d车\d门/)
+    expect(route.legs[1].recommendations.length).toBeGreaterThan(0)
   })
   it('recomputes recommendations when facility geometry changes, without changing the algorithm', () => {
     const d = clone()
@@ -183,8 +210,10 @@ describe('mode objectives and continuous accessibility', () => {
   it('rejects stairs AND escalators on all origin, transfer and destination paths', () => {
     const result = planJourney(demoDataset, { from: 's-west', to: 's-bay', mode: 'elevator' })
     expect(result.status).toBe('ok')
-    for (const route of result.routes) for (const c of route.doorCombinations) {
-      for (const path of [c.originPath, ...c.transferPaths, c.destinationPath]) {
+    for (const route of result.routes) {
+      const paths = [route.originPath!, ...route.legs.flatMap(leg => leg.recommendations.map(r => r.arrivalPath!))]
+      expect(paths.length).toBeGreaterThan(route.legs.length)
+      for (const path of paths) {
         expect(path.edges.some(e => e.kind === 'stairs' || e.kind === 'escalator')).toBe(false)
         expect(path.edges.every(e => e.knowledge === 'confirmed')).toBe(true)
         for (let i = 0; i < path.edges.length; i++) {

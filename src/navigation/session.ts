@@ -56,13 +56,11 @@ const isDemo = computed(() => datasetMode.value === 'demo')
 const mode = ref<RouteMode>('shortest')
 const result = ref<ReturnType<typeof planJourney> | null>(null)
 const selectedRoute = ref(0)
-const selectedCombination = ref(0)
-const combinationChosen = ref(false)
 const busy = ref(false)
 const editing = ref(false)
 const picker = ref<'from' | 'to' | null>(null)
 const query = ref('')
-type Sheet = 'scenarios' | 'routes' | 'doors' | 'network' | 'data'
+type Sheet = 'scenarios' | 'routes' | 'network' | 'data'
 const sheet = ref<Sheet | null>(null)
 const expanded = ref<string[]>([])
 const fixtureApplied = ref(false)
@@ -76,14 +74,14 @@ const filteredStations = computed(() => data.stations.filter(s => s.name.include
 const scenarios = computed(() => demoScenarios.filter(s => data.stations.some(station => station.id === s.from) && data.stations.some(station => station.id === s.to)))
 const route = computed(() => candidateRuns.value.find(item => item.id === selectedDeparture.value)?.routeOverride ?? result.value?.routes[selectedRoute.value])
 const currentMode = computed(() => modes.find(m => m.id === mode.value)!)
-const sheetTitle = computed(() => ({ scenarios: '选择线网与演示场景', routes: '选择乘车方案', doors: '选择一组推荐车门', network: '运营线网与覆盖车站', data: '数据与规划说明' })[sheet.value ?? 'data'])
+const sheetTitle = computed(() => ({ scenarios: '选择线网与演示场景', routes: '选择乘车方案', network: '运营线网与覆盖车站', data: '数据与规划说明' })[sheet.value ?? 'data'])
 const errorTitle = computed(() => dataErrors.value.length ? '数据加载失败' : result.value?.status === 'incomplete' ? '站内资料还需补全' : result.value?.status === 'invalid' ? '请检查起点和终点' : '暂未找到可通行方案')
 const errorMessages = computed(() => result.value?.diagnostics.filter(text => !text.startsWith('范围：') && !text.startsWith('候选范围：') && !text.startsWith('合成演示数据：')) ?? [])
 const actionableErrors = computed(() => errorMessages.value.filter(text => !text.startsWith('已录入站内数据时') && !text.startsWith('线路候选')))
 const searchLimited = computed(() => result.value?.diagnostics.some(text => text.includes('搜索') && (text.includes('上限') || text.includes('截断'))))
 const linesForStation = (id: string) => data.lines.filter(l => data.services.some(s => s.lineId === l.id && s.stops.some(p => p.stationId === id)))
 function calculate() {
-  busy.value = true; selectedRoute.value = 0; selectedCombination.value = 0; combinationChosen.value = false; expanded.value = []; detailExpanded.value = []; detailScrollTop.value = 0; timingByRoute.value = {}
+  busy.value = true; selectedRoute.value = 0; expanded.value = []; detailExpanded.value = []; detailScrollTop.value = 0; timingByRoute.value = {}
   try { result.value = dataErrors.value.length
     ? { status: 'invalid', routes: [], diagnostics: ['当前数据包未通过校验，已停止规划。', ...dataErrors.value] }
     : planJourney(data, { from: from.value, to: to.value, mode: mode.value }) }
@@ -113,14 +111,13 @@ function chooseStation(id: string) { if (picker.value === 'from') from.value = i
 function swap() { const previous = from.value; from.value = to.value; to.value = previous; if (result.value) calculate() }
 function loadScenario(scenario: typeof demoScenarios[number]) { from.value = scenario.from; to.value = scenario.to; mode.value = scenario.mode; sheet.value = null; calculate() }
 function toggle(id: string) { expanded.value = expanded.value.includes(id) ? expanded.value.filter(x => x !== id) : [...expanded.value, id] }
-function selectRoute(i: number) { selectedRoute.value = i; selectedCombination.value = 0; combinationChosen.value = false; expanded.value = []; detailExpanded.value = []; detailScrollTop.value = 0; sheet.value = null }
+function selectRoute(i: number) { selectedRoute.value = i; expanded.value = []; detailExpanded.value = []; detailScrollTop.value = 0; sheet.value = null }
 function selectDeparture(id: string) {
   const item = candidates.value.find(candidate => candidate.id === id)
   if (!item || id === selectedDeparture.value) return
   selectRoute(item.routeIndex); selectedDeparture.value = item.id
 }
 function setDeparture(value: DepartureIntent) { departureIntent.value = value; if (result.value) calculate() }
-function selectCombination(i: number) { selectedCombination.value = i; combinationChosen.value = true; sheet.value = null }
 function routeLabel(item: JourneyRoute) { return item.legs.length ? item.legs.map(l => transitDisplayText(l.lineName).replace('演示', '')).join(' → ') : '站外步行衔接，无需乘车' }
 const minutes = (value: number | null) => value === null ? '待补' : Math.ceil(value)
 const stopCount = (item: JourneyRoute) => item.legs.reduce((sum, leg) => sum + leg.stopCount, 0)
@@ -189,7 +186,7 @@ const routeTiming = computed(() => {
 })
 
 adoptPublished()
-return { timetable, datasetMode, loaded, data, personalNotice, maintenanceOpen, maintenanceError, backupText, backupMessage, datasetGeneration, personalCopyPresent, loadOfficialNavigation, openContribution, from, to, dataErrors, isDemo, mode, result, selectedRoute, selectedCombination, combinationChosen, busy, editing, picker, query, sheet, expanded, fixtureApplied, modes, stationName, filteredStations, scenarios, route, currentMode, sheetTitle, errorTitle, errorMessages, actionableErrors, searchLimited, linesForStation, calculate, changeMode, openPicker, chooseStation, swap, loadScenario, toggle, selectRoute, selectCombination, routeLabel, minutes, stopCount, outsideCount, replaceData, useDataset, applyDataset, backupDataset, applyFixture, initialized, departureIntent, detailExpanded, detailScrollTop, timingByRoute, routeTiming, queryWindow, candidateRuns, timetableAvailable, candidates, selectedDeparture, boardPosition, selectDeparture, setDeparture }
+return { timetable, datasetMode, loaded, data, personalNotice, maintenanceOpen, maintenanceError, backupText, backupMessage, datasetGeneration, personalCopyPresent, loadOfficialNavigation, openContribution, from, to, dataErrors, isDemo, mode, result, selectedRoute, busy, editing, picker, query, sheet, expanded, fixtureApplied, modes, stationName, filteredStations, scenarios, route, currentMode, sheetTitle, errorTitle, errorMessages, actionableErrors, searchLimited, linesForStation, calculate, changeMode, openPicker, chooseStation, swap, loadScenario, toggle, selectRoute, routeLabel, minutes, stopCount, outsideCount, replaceData, useDataset, applyDataset, backupDataset, applyFixture, initialized, departureIntent, detailExpanded, detailScrollTop, timingByRoute, routeTiming, queryWindow, candidateRuns, timetableAvailable, candidates, selectedDeparture, boardPosition, selectDeparture, setDeparture }
 }
 let session: ReturnType<typeof createJourneySession> | undefined
 // The application session outlives any page that first opens it (including reLaunch).
